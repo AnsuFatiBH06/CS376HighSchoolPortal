@@ -1,10 +1,8 @@
-public class SystemAdmin {
-    int AdminID;
-    String FName;
-    String LName;
-    String Email;
-    int CredentialsID;
-
+public class SystemAdmin extends User {
+    public SystemAdmin(int userID, String fName, String lName, String email, int credentialsID) {
+        super(userID, fName, lName, email, credentialsID);
+    }
+    
     public void approveSchool(int schoolID) {
 
     }

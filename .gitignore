@@ -41,3 +41,6 @@ build/
 
 ### Github ###
 .github/
+
+### Our demo classes while debugging and testing ###
+demoClasses/
