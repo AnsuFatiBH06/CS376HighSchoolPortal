@@ -1,3 +1,5 @@
+package com.highschoolportal.model;
+
 public class Manager extends User {
     private boolean isSuperManager;
     private int schoolID;

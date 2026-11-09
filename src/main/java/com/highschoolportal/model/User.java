@@ -1,3 +1,5 @@
+package com.highschoolportal.model;
+
 public class User {
     private int userID;
     private String fName;
