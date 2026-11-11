@@ -68,8 +68,7 @@ public class App {
         }
         this.pageHistory.pop();
 
-        String previousPage =
-                this.pageHistory.peek();
+        String previousPage = this.pageHistory.peek();
 
         this.cardLayout.show(this.innerContainer, previousPage);
     }
