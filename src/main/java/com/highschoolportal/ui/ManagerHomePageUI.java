@@ -1,39 +1,40 @@
 package com.highschoolportal.ui;
-import java.awt.Component;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+
 import com.highschoolportal.app.App;
 
-
 public class ManagerHomePageUI extends JPanel {
-    private App app;
-    private JLabel title;
-    private JButton schoolRegButton;
-    private JButton academicYearButton;
-    private JButton logoutButton;
+
+    private final App app;
+
+    private final JButton schoolRegButton;
+    private final JButton academicYearButton;
+    private final JButton logoutButton;
 
     public ManagerHomePageUI(App app) {
+
         this.app = app;
-        this.title = new JLabel("Manager Homepage");
-        this.schoolRegButton = new JButton("School Registration");
-        this.academicYearButton = new JButton("Academic Year Management");
-        this.logoutButton = new JButton("Logout");
 
-        add(this.title);
-        // add(Box.createVerticalStrut(20));
-        // this.title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        schoolRegButton = new JButton("School Registration");
+        academicYearButton = new JButton("Academic Year Management");
+        logoutButton = new JButton("Logout");
 
-        add(this.schoolRegButton);
-        add(this.academicYearButton);
-        add(this.logoutButton);
+        add(schoolRegButton);
+        add(academicYearButton);
+        add(logoutButton);
 
-        this.schoolRegButton.addActionListener(e -> {
-            this.app.showPage(PageNames.SCHOOLSIGNUPPAGE);
-        });
+        academicYearButton.addActionListener(event ->
+                this.app.showPage(PageNames.ACADEMIC_YEAR_MANAGEMENT)
+        );
 
-        this.logoutButton.addActionListener(e -> {
-            this.app.showPage(PageNames.LOGIN);
-            // maybe replace it with goBack()
-        });
+        schoolRegButton.addActionListener(event ->
+                this.app.showPage(PageNames.SCHOOLSIGNUPPAGE)
+        );
+
+        logoutButton.addActionListener(event ->
+                this.app.showPage(PageNames.LOGIN)
+        );
     }
 }
