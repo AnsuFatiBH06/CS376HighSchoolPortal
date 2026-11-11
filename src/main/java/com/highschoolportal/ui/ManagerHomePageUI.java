@@ -20,11 +20,11 @@ public class ManagerHomePageUI extends JPanel {
         add(this.logoutButton);
 
         this.schoolRegButton.addActionListener(e -> {
-            this.app.showPage("SCHOOL_REGISTRATION");
+            this.app.showPage(PageNames.SCHOOLSIGNUPPAGE);
         });
 
         this.logoutButton.addActionListener(e -> {
-            this.app.showPage("LOGIN");
+            this.app.showPage(PageNames.LOGIN);
         });
     }
 }
