@@ -5,26 +5,26 @@ import com.highschoolportal.app.App;
 
 public class ManagerHomePageUI extends JPanel {
     private App app;
-    private JButton schoolButton;
+    private JButton schoolRegButton;
     private JButton academicYearButton;
     private JButton logoutButton;
 
     public ManagerHomePageUI(App app) {
         this.app = app;
-        this.schoolButton = new JButton("School Registration");
+        this.schoolRegButton = new JButton("School Registration");
         this.academicYearButton = new JButton("Academic Year Management");
-
         this.logoutButton = new JButton("Logout");
 
-        add(this.schoolButton);
-
+        add(this.schoolRegButton);
         add(this.academicYearButton);
-
         add(this.logoutButton);
 
-        this.logoutButton.addActionListener(e -> {
+        this.schoolRegButton.addActionListener(e -> {
+            this.app.showPage("SCHOOL_REGISTRATION");
+        });
 
-            // app.showPage("LOGIN");
+        this.logoutButton.addActionListener(e -> {
+            this.app.showPage("LOGIN");
         });
     }
 }

@@ -11,6 +11,8 @@ import javax.swing.JPanel;
 import com.highschoolportal.database.MySQLConnect;
 // import com.highschoolportal.ui.LoginUI;
 import com.highschoolportal.ui.ManagerHomePageUI;
+import com.highschoolportal.ui.PageNames;
+import com.highschoolportal.ui.SchoolSignupUI;
 
 
 public class App {
@@ -43,7 +45,9 @@ public class App {
 
         // innerContainer.add(new LoginUI(this), "LOGIN");
 
-        this.innerContainer.add(new ManagerHomePageUI(this), "MANAGER_HOMEPAGE");
+        this.innerContainer.add(new ManagerHomePageUI(this), PageNames.MANAGER_HOMEPAGE);
+        this.innerContainer.add(new SchoolSignupUI(this), PageNames.SCHOOLSIGNUPPAGE);
+
         this.mainFrame.add(this.innerContainer);
 
         // showPage("LOGIN");
