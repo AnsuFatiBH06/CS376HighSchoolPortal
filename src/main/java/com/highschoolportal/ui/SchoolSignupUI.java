@@ -74,11 +74,6 @@ public class SchoolSignupUI extends JPanel {
 
         add(wrapper, BorderLayout.CENTER);
 
-        attachButtonListeners();
-    }
-
-    private void attachButtonListeners() {
-
         this.submitButton.addActionListener(e -> {
             String schoolName = this.schoolNameField.getText();
             String managerEmail = this.emailField.getText();
@@ -89,14 +84,13 @@ public class SchoolSignupUI extends JPanel {
             if(success) {
                 JOptionPane.showMessageDialog(this, "School registration submitted.");
                 this.app.showPage(PageNames.MANAGER_HOMEPAGE);
-
             } else {
                 JOptionPane.showMessageDialog(this, "Registration failed.");
             }
         });
 
         this.backButton.addActionListener(e ->
-                app.goBack()
+            this.app.goBack()
         );
     }
 }

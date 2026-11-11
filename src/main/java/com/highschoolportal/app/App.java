@@ -22,16 +22,16 @@ public class App {
     private Stack<String> pageHistory;
 
     public App() {
-        try {
-            Connection databaseConnection = MySQLConnect.getInstance().getConnection();
-            if (databaseConnection == null) {
-                System.out.println("Failed to connect to the database.");
-                System.exit(0);
-            }
-        } catch (SQLException e) {
-            System.out.println(e);
-            System.exit(0);
-        }
+        // try {
+        //     Connection databaseConnection = MySQLConnect.getInstance().getConnection();
+        //     if (databaseConnection == null) {
+        //         System.out.println("Failed to connect to the database.");
+        //         System.exit(0);
+        //     }
+        // } catch (SQLException e) {
+        //     System.out.println(e);
+        //     System.exit(0);
+        // }
 
         this.pageHistory = new Stack<>();
         this.mainFrame = new JFrame("High School Portal");
@@ -47,6 +47,8 @@ public class App {
 
         this.innerContainer.add(new ManagerHomePageUI(this), PageNames.MANAGER_HOMEPAGE);
         this.innerContainer.add(new SchoolSignupUI(this), PageNames.SCHOOLSIGNUPPAGE);
+
+        showPage(PageNames.MANAGER_HOMEPAGE); // change to login later once login page is ready
 
         this.mainFrame.add(this.innerContainer);
 
