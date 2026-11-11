@@ -2,9 +2,13 @@ package com.highschoolportal.app;
 import java.awt.CardLayout;
 import java.util.Stack;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.highschoolportal.database.MySQLConnect;
 // import com.highschoolportal.ui.LoginUI;
 import com.highschoolportal.ui.ManagerHomePageUI;
 
@@ -16,6 +20,17 @@ public class App {
     private Stack<String> pageHistory;
 
     public App() {
+        try {
+            Connection databaseConnection = MySQLConnect.getInstance().getConnection();
+            if (databaseConnection == null) {
+                System.out.println("Failed to connect to the database.");
+                System.exit(0);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+            System.exit(0);
+        }
+
         this.pageHistory = new Stack<>();
         this.mainFrame = new JFrame("High School Portal");
 

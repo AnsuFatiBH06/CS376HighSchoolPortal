@@ -11,7 +11,7 @@ public class MySQLConnect {
     private final String loginPassword;
 
     private MySQLConnect() {
-        this.databaseLink = "jdbc:mysql://localhost:3306/highschoolportal";
+        this.databaseLink = "jdbc:mysql:devweb2026.cis.strath.ac.uk:3306";
         this.loginUsername = "root";
         this.loginPassword = "root";
     } // the values inside this constructor should definitely be changed
