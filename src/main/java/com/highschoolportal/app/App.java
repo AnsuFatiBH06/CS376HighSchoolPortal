@@ -1,79 +1,92 @@
 package com.highschoolportal.app;
+
 import java.awt.CardLayout;
 import java.util.Stack;
-
-import java.sql.Connection;
-import java.sql.SQLException;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.highschoolportal.database.MySQLConnect;
-// import com.highschoolportal.ui.LoginUI;
+import com.highschoolportal.model.Manager;
+import com.highschoolportal.ui.BusinessRuleUI;
 import com.highschoolportal.ui.ManagerHomePageUI;
 import com.highschoolportal.ui.PageNames;
 import com.highschoolportal.ui.SchoolSignupUI;
 
-
 public class App {
-    private JFrame mainFrame;
-    private CardLayout cardLayout;
-    private JPanel innerContainer;
-    private Stack<String> pageHistory;
+
+    private final JFrame mainFrame;
+    private final CardLayout cardLayout;
+    private final JPanel innerContainer;
+    private final Stack<String> pageHistory;
+    private final Manager currentManager;
 
     public App() {
-        // try {
-        //     Connection databaseConnection = MySQLConnect.getInstance().getConnection();
-        //     if (databaseConnection == null) {
-        //         System.out.println("Failed to connect to the database.");
-        //         System.exit(0);
-        //     }
-        // } catch (SQLException e) {
-        //     System.out.println(e);
-        //     System.exit(0);
-        // }
+        this(null);
+    }
 
-        this.pageHistory = new Stack<>();
-        this.mainFrame = new JFrame("High School Portal");
+    public App(Manager currentManager) {
 
-        this.mainFrame.setSize(1000, 700);
-        this.mainFrame.setLocationRelativeTo(null);
-        this.mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.currentManager = currentManager;
 
-        this.cardLayout = new CardLayout();
-        this.innerContainer = new JPanel(cardLayout);
+        pageHistory = new Stack<>();
 
-        // innerContainer.add(new LoginUI(this), "LOGIN");
+        mainFrame = new JFrame("High School Portal");
 
-        this.innerContainer.add(new ManagerHomePageUI(this), PageNames.MANAGER_HOMEPAGE);
-        this.innerContainer.add(new SchoolSignupUI(this), PageNames.SCHOOLSIGNUPPAGE);
+        mainFrame.setSize(1000, 700);
+        mainFrame.setLocationRelativeTo(null);
+        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        showPage(PageNames.MANAGER_HOMEPAGE); // change to login later once login page is ready
+        cardLayout = new CardLayout();
+        innerContainer = new JPanel(cardLayout);
 
-        this.mainFrame.add(this.innerContainer);
+        innerContainer.add(
+                new ManagerHomePageUI(this),
+                PageNames.MANAGER_HOMEPAGE
+        );
 
-        // showPage("LOGIN");
+        innerContainer.add(
+                new SchoolSignupUI(this),
+                PageNames.SCHOOLSIGNUPPAGE
+        );
 
-        this.mainFrame.setVisible(true);
+        innerContainer.add(
+                new BusinessRuleUI(this),
+                PageNames.ACADEMIC_YEAR_MANAGEMENT
+        );
+
+        mainFrame.add(innerContainer);
+
+        showPage(PageNames.MANAGER_HOMEPAGE);
+
+        mainFrame.setVisible(true);
+    }
+
+    public Manager getCurrentManager() {
+        return currentManager;
     }
 
     public void showPage(String pageName) {
-        this.cardLayout.show(this.innerContainer, pageName);
-        this.pageHistory.push(pageName);
+
+        cardLayout.show(innerContainer, pageName);
+
+        pageHistory.push(pageName);
     }
 
     public void goBack() {
-        if(this.pageHistory.size() <= 1) {
+
+        if (pageHistory.size() <= 1) {
             return;
         }
-        this.pageHistory.pop();
 
-        String previousPage = this.pageHistory.peek();
+        pageHistory.pop();
 
-        this.cardLayout.show(this.innerContainer, previousPage);
+        String previousPage = pageHistory.peek();
+
+        cardLayout.show(innerContainer, previousPage);
     }
 
     public static void main(String[] args) {
+
         new App();
     }
 }
