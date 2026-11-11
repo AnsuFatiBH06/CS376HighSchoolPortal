@@ -13,4 +13,8 @@ public class SchoolRegistrationService {
 
         return true;
     }
+
+    public static void registerSchool() {
+        
+    }
 }
