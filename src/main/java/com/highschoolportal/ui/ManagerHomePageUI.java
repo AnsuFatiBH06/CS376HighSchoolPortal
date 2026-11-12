@@ -1,30 +1,42 @@
 package com.highschoolportal.ui;
-import javax.swing.*;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import java.awt.Color;
+
 import com.highschoolportal.app.App;
 
-
 public class ManagerHomePageUI extends JPanel {
-    private App app;
-    private JButton schoolRegButton;
-    private JButton academicYearButton;
-    private JButton logoutButton;
+
+    private final App app;
+
+    private final JButton schoolRegButton;
+    private final JButton academicYearButton;
+    private final JButton logoutButton;
 
     public ManagerHomePageUI(App app) {
+
         this.app = app;
-        this.schoolRegButton = new JButton("School Registration");
-        this.academicYearButton = new JButton("Academic Year Management");
-        this.logoutButton = new JButton("Logout");
 
-        add(this.schoolRegButton);
-        add(this.academicYearButton);
-        add(this.logoutButton);
+        schoolRegButton = new JButton("School Registration");
+        academicYearButton = new JButton("Academic Year Management");
+        logoutButton = new JButton("Logout");
+        logoutButton.setBackground(Color.RED);
 
-        this.schoolRegButton.addActionListener(e -> {
-            this.app.showPage(PageNames.SCHOOLSIGNUPPAGE);
-        });
+        add(schoolRegButton);
+        add(academicYearButton);
+        add(logoutButton);
 
-        this.logoutButton.addActionListener(e -> {
-            this.app.showPage(PageNames.LOGIN);
-        });
+        academicYearButton.addActionListener(event ->
+                this.app.showPage(PageNames.ACADEMIC_YEAR_MANAGEMENT)
+        );
+
+        schoolRegButton.addActionListener(event ->
+                this.app.showPage(PageNames.SCHOOLSIGNUPPAGE)
+        );
+
+        logoutButton.addActionListener(event ->
+                this.app.showPage(PageNames.LOGIN)
+        );
     }
 }
