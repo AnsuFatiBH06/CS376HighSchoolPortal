@@ -14,15 +14,16 @@ public class MySQLConnect {
     private final String loginPassword;
 
     // Reads from the environment variables and falls back to the defaults set by us
+    // DOUBLE CHECK THIS
     private MySQLConnect() {
-        String host = getEnv("DB_HOST", "devweb2026.cis.strath.ac.uk");
-        String port = getEnv("DB_PORT", "3306");
-        String name = getEnv("DB_NAME", "DATABASE_NAME"); // REPLACE WITH ACTUAL CREDENTIALS
+        String host = System.getenv("DB_HOST");
+        String port = System.getenv("DB_PORT");
+        String name = System.getenv("DB_NAME"); 
 
         // Build the JDBC URL from the parts
         this.databaseLink = "jdbc:mysql://" + host + ":" + port + "/" + name;
-        this.loginUsername = getEnv("DB_USER", "YOUR_USERNAME"); // REPLACE WITH ACTUAL CREDENTIALS
-        this.loginPassword = getEnv("DB_PASSWORD", "YOUR_PASSWORD"); // REPLACE WITH ACTUAL CREDENTIALS
+        this.loginUsername = System.getenv("DB_USER"); 
+        this.loginPassword = System.getenv("DB_PASSWORD");
     } 
 
     private static class Holder {
