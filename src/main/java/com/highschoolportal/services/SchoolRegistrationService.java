@@ -1,10 +1,21 @@
 package com.highschoolportal.services;
-import com.highschoolportal.database.DynamicSQLQuery;
 import com.highschoolportal.model.School;
+import com.highschoolportal.repository.SchoolRepository;
+
+import java.sql.SQLException;
+
 import javax.swing.JTextField;
 
 public class SchoolRegistrationService {
-    public SchoolRegistrationService() {}
+    private final SchoolRepository schoolRepository;
+
+    public SchoolRegistrationService() {
+        this(new SchoolRepository());
+    }
+
+    SchoolRegistrationService(SchoolRepository schoolRepository) {
+        this.schoolRepository = schoolRepository;
+    }
 
     public static boolean validateSchoolDetails(
                                 JTextField schoolNameField, JTextField emailField,
@@ -37,7 +48,11 @@ public class SchoolRegistrationService {
         return true;
     }
 
-    public static boolean registerSchool(School school) {
-        return DynamicSQLQuery.getInstance().insertSchool(school);
+    public boolean registerSchool(School school) {
+        try {
+            return this.schoolRepository.insertPendingSchool(school);
+        } catch (SQLException e) {
+            return false;
+        }
     }
 }

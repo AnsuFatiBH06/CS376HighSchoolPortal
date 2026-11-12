@@ -2,6 +2,7 @@ package com.highschoolportal.ui;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import java.awt.Color;
 
 import com.highschoolportal.app.App;
 
@@ -20,6 +21,7 @@ public class ManagerHomePageUI extends JPanel {
         schoolRegButton = new JButton("School Registration");
         academicYearButton = new JButton("Academic Year Management");
         logoutButton = new JButton("Logout");
+        logoutButton.setBackground(Color.RED);
 
         add(schoolRegButton);
         add(academicYearButton);
