@@ -1,6 +1,8 @@
 package com.highschoolportal.ui;
 import javax.swing.*;
 import java.awt.*;
+import java.sql.SQLException;
+
 import com.highschoolportal.app.App;
 import com.highschoolportal.services.SchoolRegistrationService;
 import com.highschoolportal.model.School;
@@ -42,7 +44,7 @@ public class SchoolSignupUI extends JPanel {
         this.emailDomainField.setMaximumSize(new Dimension(300, 30));
 
         this.submitButton = new JButton("Submit");
-        this.backButton = new JButton("Back");
+        this.backButton = new JButton("Back to Manager Home");
         submitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -81,7 +83,8 @@ public class SchoolSignupUI extends JPanel {
 
         add(wrapper, BorderLayout.CENTER);
 
-        this.submitButton.addActionListener(e -> {
+        this.submitButton.addActionListener(event -> {
+            // this.submitButton.setText("Attempting to register...");
             boolean detailsValid = SchoolRegistrationService.validateSchoolDetails(
                                         this.schoolNameField,
                                         this.emailField,
@@ -91,24 +94,24 @@ public class SchoolSignupUI extends JPanel {
 
             if (detailsValid) {
                 School school = new School(
+                                        this.schoolNameField.getText(),
                                         this.emailField.getText(),
                                         this.emailDomainField.getText(),
                                         this.addressField.getText(),
                                         "Pending"
                                     );
-                
-                if (SchoolRegistrationService.registerSchool(school)) {
-                    JOptionPane.showMessageDialog(this, "School registration submitted.");
-                    this.app.goBack();
-                } else {
-                    JOptionPane.showMessageDialog(this, "School registration failed.");
-                }
+            if (new SchoolRegistrationService().registerSchool(school)) {
+                JOptionPane.showMessageDialog(this, "School registration submitted.");
+                this.app.goBack();
+            } else {
+                JOptionPane.showMessageDialog(this, "School registration failed.");
+            }
             } else {
                 JOptionPane.showMessageDialog(this, "School details validation failed.");
             }
         });
 
-        this.backButton.addActionListener(e ->
+        this.backButton.addActionListener(event ->
             this.app.goBack()
         );
     }
