@@ -7,10 +7,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.highschoolportal.model.Manager;
-import com.highschoolportal.ui.BusinessRuleUI;
-import com.highschoolportal.ui.ManagerHomePageUI;
 import com.highschoolportal.ui.PageNames;
-import com.highschoolportal.ui.SchoolSignupUI;
+import com.highschoolportal.ui.managerpages.*;
 
 public class App {
 
