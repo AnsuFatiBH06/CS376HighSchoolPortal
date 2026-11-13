@@ -17,6 +17,7 @@ public class ConnectionTest {
             System.out.println("Connected: " + conn.getMetaData().getURL());
 
         } catch (Exception e) {
+            System.out.println("Connection Failed: " + e.getMessage());
             e.printStackTrace();
         }
     }

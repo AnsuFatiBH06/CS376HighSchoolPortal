@@ -1,5 +1,7 @@
 package com.highschoolportal.database;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -13,17 +15,18 @@ public class MySQLConnect {
     private final String loginUsername;
     private final String loginPassword;
 
-    // Reads from the environment variables and falls back to the defaults set by us
-    // DOUBLE CHECK THIS
-    private MySQLConnect() {
-        String host = System.getenv("DB_HOST");
-        String port = System.getenv("DB_PORT");
-        String name = System.getenv("DB_NAME"); 
+    private static final Dotenv dotenv = Dotenv.load();
 
-        // Build the JDBC URL from the parts
+    private MySQLConnect() {
+        String host = dotenv.get("DB_HOST");
+        String port = dotenv.get("DB_PORT");
+        String name = dotenv.get("DB_NAME"); 
+
+        // Build the JDBC URL from the parts 
+        // WILL FAIL IF .env DOES NOT CONTAIN ALL VALUES
         this.databaseLink = "jdbc:mysql://" + host + ":" + port + "/" + name;
-        this.loginUsername = System.getenv("DB_USER"); 
-        this.loginPassword = System.getenv("DB_PASSWORD");
+        this.loginUsername = dotenv.get("DB_USER"); 
+        this.loginPassword = dotenv.get("DB_PASSWORD");
     } 
 
     private static class Holder {
@@ -40,11 +43,5 @@ public class MySQLConnect {
                 loginUsername,
                 loginPassword
         );
-    }
-
-    // Environment variable reader
-    private static String getEnv(String key, String defaultValue) {
-        String value = System.getenv(key);
-        return (value != null && !value.isBlank()) ? value : defaultValue;
     }
 }
