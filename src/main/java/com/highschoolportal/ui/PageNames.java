@@ -16,8 +16,8 @@ public class PageNames {
     public static final String ADMIN_PASSWORD_MANAGEMENT = "ADMIN_PASSWORD_MANAGEMENT";
 
     // Teacher Pages
-
+    public static final String TEACHER_HOMEPAGE = "TEACHER_HOMEPAGE";
 
     // Student Pages
-
+    public static final String STUDENT_HOMEPAGE = "STUDENT_HOMEPAGE";
 }

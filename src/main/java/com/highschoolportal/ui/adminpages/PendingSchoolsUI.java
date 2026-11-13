@@ -19,19 +19,20 @@ public class PendingSchoolsUI extends JPanel {
     }
 
     private void initializeComponents() {
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(12, 12));
+        setBorder(BorderFactory.createEmptyBorder(18, 22, 18, 22));
 
-        JPanel topPanel = new JPanel(new BorderLayout());
-
+        JPanel up = new JPanel(new BorderLayout());
         JButton backButton = new JButton("Back to Homepage");
-
+        up.add(backButton, BorderLayout.WEST);
         JButton actionButton = new JButton("Actions");
+        up.add(actionButton, BorderLayout.EAST);
 
-        topPanel.add(backButton, BorderLayout.WEST);
+        JLabel heading = new JLabel("Pending Schools");
+        heading.setFont(heading.getFont().deriveFont(22f));
+        up.add(heading, BorderLayout.SOUTH);
 
-        topPanel.add(actionButton, BorderLayout.EAST);
-
-        add(topPanel, BorderLayout.NORTH);
+        add(up, BorderLayout.NORTH);
 
         backButton.addActionListener(event ->
             app.goBack()
@@ -53,7 +54,16 @@ public class PendingSchoolsUI extends JPanel {
                 );
 
         schoolsTable = new JTable(tableModel);
-        add(new JScrollPane(schoolsTable), BorderLayout.CENTER);
+
+        schoolsTable.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION
+        );
+
+        schoolsTable.setAutoCreateRowSorter(true);
+
+        JScrollPane scrollPane = new JScrollPane(schoolsTable);
+
+        add(scrollPane, BorderLayout.CENTER);
     }
 
     private void handleAction() {

@@ -1,8 +1,12 @@
 package com.highschoolportal.ui.adminpages;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.Color;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
 import com.highschoolportal.app.App;
 import com.highschoolportal.ui.PageNames;
@@ -11,24 +15,42 @@ public class SystemAdminHomePageUI extends JPanel {
 
     private final App app;
 
-    private final JButton pendingSchoolsViewButton;
-    private final JButton existingSchoolsViewButton;
-    private final JButton viewPasswordRequestsButton;
-    private final JButton logoutButton;
+    private JButton pendingSchoolsViewButton;
+    private JButton existingSchoolsViewButton;
+    private JButton viewPasswordRequestsButton;
+    private JButton logoutButton;
 
     public SystemAdminHomePageUI(App app) {
         this.app = app;
+        initializeComponents();
+    }
 
-        pendingSchoolsViewButton  = new JButton("Manage Pending Schools");
-        existingSchoolsViewButton = new JButton("Manage Existing Schools");
-        viewPasswordRequestsButton = new JButton("Password Requests Management");
+    public void initializeComponents() {
+        setLayout(new BorderLayout(12, 12));
+        setBorder(BorderFactory.createEmptyBorder(18, 22, 18, 22));
+
+        JPanel up = new JPanel(new BorderLayout());
+        JLabel heading = new JLabel("System Admin HomePage");
+        heading.setFont(heading.getFont().deriveFont(22f));
+        up.add(heading, BorderLayout.CENTER);
+        add(up, BorderLayout.NORTH);
+
+        JPanel pages = new JPanel(new FlowLayout());
+        pendingSchoolsViewButton  = new JButton("Pending Schools");
+        existingSchoolsViewButton = new JButton("Existing Schools");
+        viewPasswordRequestsButton = new JButton("Password Reset Requests");
         logoutButton = new JButton("Logout");
         logoutButton.setBackground(Color.RED);
+        pages.add(pendingSchoolsViewButton);
+        pages.add(existingSchoolsViewButton);
+        pages.add(logoutButton);
 
-        add(pendingSchoolsViewButton);
-        add(existingSchoolsViewButton);
-        add(viewPasswordRequestsButton);
-        add(logoutButton);
+        add(pages, BorderLayout.CENTER);
+
+        // add(pendingSchoolsViewButton);
+        // add(existingSchoolsViewButton);
+        // add(viewPasswordRequestsButton);
+        // add(logoutButton);
 
         pendingSchoolsViewButton.addActionListener(event ->
                 this.app.showPage(PageNames.ADMIN_PENDING_SCHOOLS)
