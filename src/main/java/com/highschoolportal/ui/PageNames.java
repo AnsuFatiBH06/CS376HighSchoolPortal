@@ -11,14 +11,13 @@ public class PageNames {
 
     // Admin Pages
     public static final String ADMIN_HOMEPAGE = "ADMIN_HOMEPAGE";
-    public static final String ADMIN_SCHOOL_MANAGEMENT = "ADMIN_SCHOOL_MANAGEMENT";
-    public static final String ADMIN_APPROVED_SCHOOLS = "ADMIN_APPROVED_SCHOOLS";
     public static final String ADMIN_PENDING_SCHOOLS = "ADMIN_PENDING_SCHOOLS";
+    public static final String ADMIN_APPROVED_SCHOOLS = "ADMIN_APPROVED_SCHOOLS";
     public static final String ADMIN_PASSWORD_MANAGEMENT = "ADMIN_PASSWORD_MANAGEMENT";
 
     // Teacher Pages
-
+    public static final String TEACHER_HOMEPAGE = "TEACHER_HOMEPAGE";
 
     // Student Pages
-
+    public static final String STUDENT_HOMEPAGE = "STUDENT_HOMEPAGE";
 }

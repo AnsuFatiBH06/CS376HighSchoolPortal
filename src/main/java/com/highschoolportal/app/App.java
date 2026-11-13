@@ -7,10 +7,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.highschoolportal.model.Manager;
-import com.highschoolportal.ui.BusinessRuleUI;
-import com.highschoolportal.ui.ManagerHomePageUI;
+
 import com.highschoolportal.ui.PageNames;
-import com.highschoolportal.ui.SchoolSignupUI;
+import com.highschoolportal.ui.adminpages.*;
+import com.highschoolportal.ui.managerpages.*;
+import com.highschoolportal.ui.studentpages.*;
+import com.highschoolportal.ui.teacherpages.*;
 
 public class App {
 
@@ -39,25 +41,15 @@ public class App {
         cardLayout = new CardLayout();
         innerContainer = new JPanel(cardLayout);
 
-        innerContainer.add(
-                new ManagerHomePageUI(this),
-                PageNames.MANAGER_HOMEPAGE
-        );
-
-        innerContainer.add(
-                new SchoolSignupUI(this),
-                PageNames.SCHOOLSIGNUPPAGE
-        );
-
-        innerContainer.add(
-                new BusinessRuleUI(this),
-                PageNames.ACADEMIC_YEAR_MANAGEMENT
-        );
+        addPages();
 
         mainFrame.add(innerContainer);
 
+        // this code segment should be implemented in LoginUI, but right now we're testing things out
+        // In LoginUI, we need to know the user role so that we create the correct object and open the right homepage.
         showPage(PageNames.MANAGER_HOMEPAGE);
 
+        // keep this segment
         mainFrame.setVisible(true);
     }
 
@@ -73,20 +65,29 @@ public class App {
     }
 
     public void goBack() {
-
         if (pageHistory.size() <= 1) {
             return;
         }
 
         pageHistory.pop();
-
         String previousPage = pageHistory.peek();
-
+        
         cardLayout.show(innerContainer, previousPage);
     }
 
-    public static void main(String[] args) {
+    private void addPages() {
+        // Admin Pages
+        innerContainer.add(new SystemAdminHomePageUI(this), PageNames.ADMIN_HOMEPAGE);
+        innerContainer.add(new ApprovedSchoolsUI(this), PageNames.ADMIN_APPROVED_SCHOOLS);
+        innerContainer.add(new PendingSchoolsUI(this), PageNames.ADMIN_PENDING_SCHOOLS);
 
+        // Manager Pages
+        innerContainer.add(new ManagerHomePageUI(this), PageNames.MANAGER_HOMEPAGE);
+        innerContainer.add(new SchoolSignupUI(this), PageNames.SCHOOLSIGNUPPAGE);
+        innerContainer.add(new BusinessRuleUI(this), PageNames.ACADEMIC_YEAR_MANAGEMENT);
+    }
+
+    public static void main(String[] args) {
         new App();
     }
 }

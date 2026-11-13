@@ -1,11 +1,11 @@
-package com.highschoolportal.ui;
+package com.highschoolportal.ui.adminpages;
 
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.table.DefaultTableModel;
 
 import com.highschoolportal.app.App;
-import com.highschoolportal.services.SchoolAdministrationService;;
+import com.highschoolportal.services.SchoolAdministrationService;
 
 public class ApprovedSchoolsUI extends JPanel {
     private final App app;
@@ -20,11 +20,18 @@ public class ApprovedSchoolsUI extends JPanel {
     }
 
     private void initializeComponents() {
-        setLayout(new BorderLayout());
+        setLayout(new BorderLayout(12, 12));
+        setBorder(BorderFactory.createEmptyBorder(18, 22, 18, 22));
 
-        JButton backButton = new JButton("Back to School Management");
+        JPanel up = new JPanel(new BorderLayout());
+        JButton backButton = new JButton("Back to Homepage");
+        up.add(backButton, BorderLayout.WEST);
 
-        add(backButton, BorderLayout.NORTH);
+        JLabel heading = new JLabel("Existing Schools");
+        heading.setFont(heading.getFont().deriveFont(22f));
+        up.add(heading, BorderLayout.SOUTH);
+
+        add(up, BorderLayout.NORTH);
 
         backButton.addActionListener(event ->
             app.goBack()
@@ -43,6 +50,12 @@ public class ApprovedSchoolsUI extends JPanel {
                 );
 
         schoolsTable = new JTable(tableModel);
+
+        schoolsTable.setSelectionMode(
+                ListSelectionModel.SINGLE_SELECTION
+        );
+
+        schoolsTable.setAutoCreateRowSorter(true);
 
         JScrollPane scrollPane = new JScrollPane(schoolsTable);
 

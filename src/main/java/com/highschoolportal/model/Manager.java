@@ -1,18 +1,18 @@
 package com.highschoolportal.model;
 
 public class Manager extends User {
-    private boolean isSuperManager;
+    private String superManagerStatus;
     private int schoolID;
 
-    public Manager(int userID, String fName, String lName, String email, int credentialsID, boolean isSuperManager) {
+    public Manager(int userID, String fName, String lName, String email, int credentialsID, String superManagerStatus) {
         super(userID, fName, lName, email, credentialsID);
-        this.isSuperManager = isSuperManager;
+        this.superManagerStatus = superManagerStatus;
         this.schoolID = -1;
     } // still doesnt belong to a school
 
-    public Manager(int userID, String fName, String lName, String email, int credentialsID, boolean isSuperManager, int schoolID) {
+    public Manager(int userID, String fName, String lName, String email, int credentialsID, String superManagerStatus, int schoolID) {
         super(userID, fName, lName, email, credentialsID);
-        this.isSuperManager = isSuperManager;
+        this.superManagerStatus = superManagerStatus;
         this.schoolID = schoolID;
     } // has a school
 
@@ -20,11 +20,7 @@ public class Manager extends User {
         return this.schoolID;
     }
 
-    public boolean getIsSuperManager() {
-        return this.isSuperManager;
-    }
-
-    public void registerSchool() {
-
+    public String getSuperManagerStatus() {
+        return this.superManagerStatus;
     }
 }

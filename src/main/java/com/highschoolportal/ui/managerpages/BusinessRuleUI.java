@@ -1,4 +1,4 @@
-package com.highschoolportal.ui;
+package com.highschoolportal.ui.managerpages;
 
 import com.highschoolportal.app.App;
 import com.highschoolportal.model.AcademicYear;
