@@ -1,10 +1,11 @@
-package com.highschoolportal.ui;
+package com.highschoolportal.ui.managerpages;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import java.awt.Color;
 
 import com.highschoolportal.app.App;
+import com.highschoolportal.ui.PageNames;
 
 public class ManagerHomePageUI extends JPanel {
 

@@ -1,4 +1,4 @@
-package com.highschoolportal.ui;
+package com.highschoolportal.ui.adminpages;
 
 import javax.swing.*;
 import java.awt.*;
