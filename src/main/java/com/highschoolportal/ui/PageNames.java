@@ -11,9 +11,8 @@ public class PageNames {
 
     // Admin Pages
     public static final String ADMIN_HOMEPAGE = "ADMIN_HOMEPAGE";
-    public static final String ADMIN_SCHOOL_MANAGEMENT = "ADMIN_SCHOOL_MANAGEMENT";
-    public static final String ADMIN_APPROVED_SCHOOLS = "ADMIN_APPROVED_SCHOOLS";
     public static final String ADMIN_PENDING_SCHOOLS = "ADMIN_PENDING_SCHOOLS";
+    public static final String ADMIN_APPROVED_SCHOOLS = "ADMIN_APPROVED_SCHOOLS";
     public static final String ADMIN_PASSWORD_MANAGEMENT = "ADMIN_PASSWORD_MANAGEMENT";
 
     // Teacher Pages

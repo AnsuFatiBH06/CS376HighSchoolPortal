@@ -5,7 +5,7 @@ import java.awt.*;
 import javax.swing.table.DefaultTableModel;
 
 import com.highschoolportal.app.App;
-import com.highschoolportal.services.SchoolAdministrationService;;
+import com.highschoolportal.services.SchoolAdministrationService;
 
 public class ApprovedSchoolsUI extends JPanel {
     private final App app;
@@ -22,7 +22,7 @@ public class ApprovedSchoolsUI extends JPanel {
     private void initializeComponents() {
         setLayout(new BorderLayout());
 
-        JButton backButton = new JButton("Back to School Management");
+        JButton backButton = new JButton("Back to Homepage");
 
         add(backButton, BorderLayout.NORTH);
 

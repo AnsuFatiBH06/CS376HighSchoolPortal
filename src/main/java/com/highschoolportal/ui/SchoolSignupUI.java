@@ -1,7 +1,6 @@
 package com.highschoolportal.ui;
 import javax.swing.*;
 import java.awt.*;
-import java.sql.SQLException;
 
 import com.highschoolportal.app.App;
 import com.highschoolportal.services.SchoolRegistrationService;
@@ -100,12 +99,12 @@ public class SchoolSignupUI extends JPanel {
                                         this.addressField.getText(),
                                         "Pending"
                                     );
-            if (new SchoolRegistrationService().registerSchool(school)) {
-                JOptionPane.showMessageDialog(this, "School registration submitted.");
-                this.app.goBack();
-            } else {
-                JOptionPane.showMessageDialog(this, "School registration failed.");
-            }
+                if (new SchoolRegistrationService().registerSchool(school)) {
+                    JOptionPane.showMessageDialog(this, "School registration submitted.");
+                    this.app.goBack();
+                } else {
+                    JOptionPane.showMessageDialog(this, "School registration failed.");
+                }
             } else {
                 JOptionPane.showMessageDialog(this, "School details validation failed.");
             }
