@@ -6,7 +6,7 @@ import java.util.Stack;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import com.highschoolportal.model.Manager;
+import com.highschoolportal.model.User;
 
 import com.highschoolportal.ui.PageNames;
 import com.highschoolportal.ui.adminpages.*;
@@ -20,15 +20,13 @@ public class App {
     private final CardLayout cardLayout;
     private final JPanel innerContainer;
     private final Stack<String> pageHistory;
-    private final Manager currentManager;
+    private User currentUser;
+
+    // public App() {
+    //     this(null);
+    // }
 
     public App() {
-        this(null);
-    }
-
-    public App(Manager currentManager) {
-
-        this.currentManager = currentManager;
 
         pageHistory = new Stack<>();
 
@@ -47,14 +45,19 @@ public class App {
 
         // this code segment should be implemented in LoginUI, but right now we're testing things out
         // In LoginUI, we need to know the user role so that we create the correct object and open the right homepage.
+        // LoginUI could/maybe should use setCurrentUser() method ======> app.setCurrentUser(new Manager(.....))
         showPage(PageNames.MANAGER_HOMEPAGE);
 
         // keep this segment
         mainFrame.setVisible(true);
     }
 
-    public Manager getCurrentManager() {
-        return currentManager;
+    public User getCurrentUser() {
+        return currentUser;
+    }
+
+    public void setCurrentUser(User user) {
+        currentUser = user;
     }
 
     public void showPage(String pageName) {

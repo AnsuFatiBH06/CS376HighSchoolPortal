@@ -181,7 +181,7 @@ public class BusinessRuleUI extends JPanel {
 
     private void createAcademicYear() {
 
-        Manager manager = app.getCurrentManager();
+        Manager manager = (Manager) app.getCurrentUser();
 
         if (manager == null) {
             showError(
@@ -252,7 +252,7 @@ public class BusinessRuleUI extends JPanel {
 
     private void updateSelectedRules() {
 
-        Manager manager = app.getCurrentManager();
+        Manager manager = (Manager) app.getCurrentUser();
 
         if (manager == null) {
             showError(
@@ -327,7 +327,7 @@ public class BusinessRuleUI extends JPanel {
 
         tableModel.setRowCount(0);
 
-        Manager manager = app.getCurrentManager();
+        Manager manager = (Manager) app.getCurrentUser();
 
         if (manager == null || manager.getSchoolID() <= 0) {
             return;
