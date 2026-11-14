@@ -17,6 +17,7 @@ public class ManagerHomePageUI extends JPanel {
 
     private JButton schoolRegButton;
     private JButton academicYearButton;
+    private JButton subjectManagementButton;
     private JButton logoutButton;
 
     public ManagerHomePageUI(App app) {
@@ -37,10 +38,12 @@ public class ManagerHomePageUI extends JPanel {
         JPanel pages = new JPanel(new FlowLayout());
         schoolRegButton = new JButton("School Registration");
         academicYearButton = new JButton("Academic Year Management");
+        subjectManagementButton = new JButton("Subject Management");
         logoutButton = new JButton("Logout");
         logoutButton.setBackground(Color.RED);
         pages.add(schoolRegButton);
         pages.add(academicYearButton);
+        pages.add(subjectManagementButton);
         pages.add(logoutButton);
 
         add(pages, BorderLayout.CENTER);
@@ -49,12 +52,16 @@ public class ManagerHomePageUI extends JPanel {
         // add(academicYearButton);
         // add(logoutButton);
 
-        academicYearButton.addActionListener(event ->
-                this.app.showPage(PageNames.ACADEMIC_YEAR_MANAGEMENT)
+        schoolRegButton.addActionListener(event ->
+                this.app.showPage(PageNames.MANAGER_SCHOOL_SIGNUP)
         );
 
-        schoolRegButton.addActionListener(event ->
-                this.app.showPage(PageNames.SCHOOLSIGNUPPAGE)
+        academicYearButton.addActionListener(event ->
+                this.app.showPage(PageNames.MANAGER_ACADEMIC_YEAR_MANAGEMENT)
+        );
+
+        subjectManagementButton.addActionListener(event ->
+                this.app.showPage(PageNames.MANAGER_SUBJECT_MANAGEMENT)
         );
 
         logoutButton.addActionListener(event ->
