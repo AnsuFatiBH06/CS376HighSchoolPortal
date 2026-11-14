@@ -86,8 +86,9 @@ public class App {
 
         // Manager Pages
         innerContainer.add(new ManagerHomePageUI(this), PageNames.MANAGER_HOMEPAGE);
-        innerContainer.add(new SchoolSignupUI(this), PageNames.SCHOOLSIGNUPPAGE);
-        innerContainer.add(new BusinessRuleUI(this), PageNames.ACADEMIC_YEAR_MANAGEMENT);
+        innerContainer.add(new SchoolSignupUI(this), PageNames.MANAGER_SCHOOL_SIGNUP);
+        innerContainer.add(new BusinessRuleUI(this), PageNames.MANAGER_ACADEMIC_YEAR_MANAGEMENT);
+        innerContainer.add(new ManagerSubjectsUI(this), PageNames.MANAGER_SUBJECT_MANAGEMENT);
     }
 
     public static void main(String[] args) {
