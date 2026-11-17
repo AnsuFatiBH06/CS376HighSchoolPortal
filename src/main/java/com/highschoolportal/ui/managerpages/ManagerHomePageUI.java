@@ -18,6 +18,7 @@ public class ManagerHomePageUI extends JPanel {
     private JButton schoolRegButton;
     private JButton academicYearButton;
     private JButton subjectManagementButton;
+    private JButton passwordRequestsButton;
     private JButton logoutButton;
 
     public ManagerHomePageUI(App app) {
@@ -39,11 +40,13 @@ public class ManagerHomePageUI extends JPanel {
         schoolRegButton = new JButton("School Registration");
         academicYearButton = new JButton("Academic Year Management");
         subjectManagementButton = new JButton("Subject Management");
+        passwordRequestsButton = new JButton("Password Reset Requests");
         logoutButton = new JButton("Logout");
         logoutButton.setBackground(Color.RED);
         pages.add(schoolRegButton);
         pages.add(academicYearButton);
         pages.add(subjectManagementButton);
+        pages.add(passwordRequestsButton);
         pages.add(logoutButton);
 
         add(pages, BorderLayout.CENTER);
@@ -62,6 +65,10 @@ public class ManagerHomePageUI extends JPanel {
 
         subjectManagementButton.addActionListener(event ->
                 this.app.showPage(PageNames.MANAGER_SUBJECT_MANAGEMENT)
+        );
+
+        passwordRequestsButton.addActionListener(event ->
+                this.app.showPage(PageNames.MANAGER_PASSWORD_MANAGEMENT)
         );
 
         logoutButton.addActionListener(event ->

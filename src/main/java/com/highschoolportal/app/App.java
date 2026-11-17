@@ -89,6 +89,13 @@ public class App {
         innerContainer.add(new SchoolSignupUI(this), PageNames.MANAGER_SCHOOL_SIGNUP);
         innerContainer.add(new BusinessRuleUI(this), PageNames.MANAGER_ACADEMIC_YEAR_MANAGEMENT);
         innerContainer.add(new ManagerSubjectsUI(this), PageNames.MANAGER_SUBJECT_MANAGEMENT);
+        innerContainer.add(new ManagerPasswordManagementUI(this), PageNames.MANAGER_PASSWORD_MANAGEMENT);
+
+        // Teacher and Student password pages
+        innerContainer.add(new PasswordResetRequestUI(), PageNames.PASSWORD_RESET_REQUEST);
+        innerContainer.add(new UpdatePasswordUI(this), PageNames.UPDATE_PASSWORD);
+        innerContainer.add(new TeacherHomePageUI(this), PageNames.TEACHER_HOMEPAGE);
+        innerContainer.add(new StudentHomePageUI(this), PageNames.STUDENT_HOMEPAGE);
     }
 
     public static void main(String[] args) {
