@@ -37,7 +37,7 @@ public class ManagerHomePageUI extends JPanel {
         add(up, BorderLayout.NORTH);
 
         JPanel pages = new JPanel(new FlowLayout());
-        schoolRegButton = new JButton("School Registration");
+        schoolRegButton = new JButton("School Management");
         academicYearButton = new JButton("Academic Year Management");
         subjectManagementButton = new JButton("Subject Management");
         passwordRequestsButton = new JButton("Password Reset Requests");

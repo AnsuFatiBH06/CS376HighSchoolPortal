@@ -9,16 +9,10 @@ import com.highschoolportal.model.School;
 public class SchoolSignupUI extends JPanel {
     private App app;
 
-    private JPanel formPanel;
-    private JLabel formTitle;
-
-    private JTextField schoolNameField;
-    private JTextField emailField;
-    private JTextField emailDomainField;
-    private JTextField addressField;
-
-    private JButton submitButton;
-    private JButton backButton;
+    private JTextField schoolNameField = new JTextField(18);
+    private JTextField emailField = new JTextField(18);
+    private JTextField emailDomainField = new JTextField(18);
+    private JTextField addressField = new JTextField(18);;
 
     public SchoolSignupUI(App app) {
         this.app = app;
@@ -26,63 +20,85 @@ public class SchoolSignupUI extends JPanel {
     }
 
     private void initializeComponents() {
-        setLayout(new BorderLayout());
-        this.formPanel = new JPanel();
+        setLayout(new BorderLayout(12, 12));
+        setBorder(BorderFactory.createEmptyBorder(18, 22, 18, 22));
 
-        this.formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-        this.formTitle = new JLabel("School Registration");
-        this.formTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
+        JLabel heading = new JLabel("School Management");
+        heading.setFont(heading.getFont().deriveFont(22f));
 
-        this.schoolNameField = new JTextField();
-        this.emailField = new JTextField();
-        this.emailDomainField = new JTextField();
-        this.addressField = new JTextField();
+        add(heading, BorderLayout.NORTH);
 
-        this.schoolNameField.setMaximumSize(new Dimension(300, 30));
-        this.emailField.setMaximumSize(new Dimension(300, 30));
-        this.emailDomainField.setMaximumSize(new Dimension(300, 30));
+        JPanel content = new JPanel(new BorderLayout(12, 12));
+        JPanel form = new JPanel(new GridBagLayout());
 
-        this.submitButton = new JButton("Submit");
-        this.backButton = new JButton("Back to Manager Home");
-        submitButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        backButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        form.setBorder(BorderFactory.createTitledBorder(
+                "School Details"
+        ));
 
-        this.formPanel.add(this.formTitle);
-        this.formPanel.add(Box.createVerticalStrut(20));
+        GridBagConstraints constraints = new GridBagConstraints();
 
-        this.formPanel.add(new JLabel("School Name"));
-        this.formPanel.add(this.schoolNameField);
+        constraints.insets = new Insets(5, 7, 5, 7);
+        constraints.anchor = GridBagConstraints.WEST;
+        constraints.fill = GridBagConstraints.HORIZONTAL;
 
-        this.formPanel.add(Box.createVerticalStrut(10));
+        addField(form, constraints, 0, "School Name", schoolNameField);
+        addField(form, constraints, 1, "School Email (e.g. school@edu.ac.uk)", emailField);
+        addField(form, constraints, 2, "Email Domain (e.g. strath.ac.uk)", emailDomainField);
+        addField(form, constraints, 3, "School Address", addressField);
 
-        this.formPanel.add(new JLabel("Email"));
-        this.formPanel.add(this.emailField);
+        constraints.gridx = 0;
+        constraints.gridy = 6;
+        constraints.gridwidth = 2;
 
-        this.formPanel.add(Box.createVerticalStrut(10));
+        JButton registerButton = new JButton("Register School");
+        JButton clearButton = new JButton("Clear Selection");
 
-        this.formPanel.add(new JLabel("Email Domain"));
-        this.formPanel.add(this.emailDomainField);
+        JPanel actions = new JPanel();
 
-        this.formPanel.add(Box.createVerticalStrut(10));
+        actions.add(registerButton);
+        actions.add(clearButton);
 
-        this.formPanel.add(new JLabel("Address"));
-        this.formPanel.add(this.addressField);
+        JPanel formContainer = new JPanel(new BorderLayout(5, 8));
 
-        formPanel.add(Box.createVerticalStrut(20));
+        formContainer.add(form, BorderLayout.CENTER);
+        formContainer.add(actions, BorderLayout.SOUTH);
 
-        this.formPanel.add(this.submitButton);
+        content.add(formContainer, BorderLayout.NORTH);
 
-        this.formPanel.add(Box.createVerticalStrut(10));
+        add(content, BorderLayout.CENTER);
 
-        this.formPanel.add(backButton);
+        JPanel bottom = new JPanel(new BorderLayout());
 
-        JPanel wrapper = new JPanel(new GridBagLayout());
+        JButton backButton = new JButton("Back to Manager Home");
 
-        wrapper.add(this.formPanel);
+        bottom.add(backButton, BorderLayout.WEST);
 
-        add(wrapper, BorderLayout.CENTER);
+        add(bottom, BorderLayout.SOUTH);
 
-        this.submitButton.addActionListener(event -> {
+        registerButton.addActionListener(event -> registerSchool());
+        clearButton.addActionListener(event -> clearForm());
+        backButton.addActionListener(event -> this.app.goBack());
+    }
+
+    private void addField(
+            JPanel panel,
+            GridBagConstraints constraints,
+            int row,
+            String label,
+            JTextField field) {
+
+        constraints.gridwidth = 1;
+        constraints.gridx = 0;
+        constraints.gridy = row;
+
+        panel.add(new JLabel(label), constraints);
+
+        constraints.gridx = 1;
+
+        panel.add(field, constraints);
+    }
+
+    private void registerSchool() {
             // this.submitButton.setText("Attempting to register...");
             boolean detailsValid = SchoolRegistrationService.validateSchoolDetails(
                                         this.schoolNameField,
@@ -108,10 +124,12 @@ public class SchoolSignupUI extends JPanel {
             } else {
                 JOptionPane.showMessageDialog(this, "School details validation failed.");
             }
-        });
+        }
 
-        this.backButton.addActionListener(event ->
-            this.app.goBack()
-        );
-    }
+        private void clearForm() {
+            schoolNameField.setText("");
+            emailField.setText("");
+            emailDomainField.setText("");
+            addressField.setText("");
+        }
 }
