@@ -28,11 +28,27 @@ public class SubjectManagementService {
             int examSeriesNumber) {
 
         if (name == null || name.isBlank()) {
-            return "Enter a subject name, for example Chemistry.";
+            return "Subject Name should not be empty.";
         }
 
-        if (name.trim().length() > 50) {
-            return "The subject name cannot exceed 50 characters.";
+        if (code == null || code.isBlank()) {
+            return "Subject Code should not be empty.";
+        }
+
+        if (name.trim().length() < 3 || name.trim().length() > 45) {
+            return "Subject Name should be between 3 and 45 characters.";
+        }
+
+        if (!name.matches("^[A-Za-z0-9 '&-]+$")) {
+            return "Enter a valid subject name.";
+        }
+
+        if (code.trim().length() < 3 || code.trim().length() > 45) {
+            return "Subject Code should be between 3 and 15 characters.";
+        }
+
+        if(!code.matches("^[A-Z0-9-]+$")) {
+            return "Subject Code can only include uppercase letters, numbers, and hyphens";
         }
 
         return validateRules(
@@ -47,11 +63,11 @@ public class SubjectManagementService {
             float maxMark,
             int examSeriesNumber) {
 
-        if (passMark < 0) {
+        if (passMark < 0.0) {
             return "The pass mark cannot be negative.";
         }
 
-        if (maxMark < 0) {
+        if (maxMark < 0.0) {
             return "The maximum mark cannot be negative.";
         }
 
@@ -59,12 +75,8 @@ public class SubjectManagementService {
             return "The pass mark cannot exceed the maximum mark.";
         }
 
-        if (examSeriesNumber < 1) {
-            return "The number of exams must be at least 1.";
-        }
-
-        if (examSeriesNumber > 4) {
-            return "The number of exams must be at most 4.";
+        if (examSeriesNumber < 1 || examSeriesNumber > 4) {
+            return "Exam Series Number should be between 1 and 4.";
         }
 
         return null;

@@ -33,7 +33,7 @@ public class SchoolRegistrationService {
             return "School Address should not be empty";
         }
 
-        if (schoolName.length() < 4 || schoolName.length() > 35) {
+        if (schoolName.trim().length() < 4 || schoolName.trim().length() > 35) {
             return "School Name should be between 4 and 35 characters";
         }
 
@@ -65,7 +65,7 @@ public class SchoolRegistrationService {
             return "Email must match the school domain.";
         }
 
-        if (address.length() < 10 || address.length() > 100) {
+        if (address.trim().length() < 10 || address.trim().length() > 100) {
             return "Address should be between 10 and 100 characters";
         }
 

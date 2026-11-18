@@ -4,6 +4,7 @@ import java.awt.*;
 
 import com.highschoolportal.app.App;
 import com.highschoolportal.services.SchoolRegistrationService;
+import com.highschoolportal.model.Manager;
 import com.highschoolportal.model.School;
 
 public class SchoolSignupUI extends JPanel {
@@ -46,24 +47,41 @@ public class SchoolSignupUI extends JPanel {
         addField(form, constraints, 2, "Email Domain (e.g. strath.ac.uk)", emailDomainField);
         addField(form, constraints, 3, "School Address", addressField);
 
-        JTextArea note = new JTextArea(
-                """
-                Rules for School Details:
-                1) All fields are required
-                2) School Name should have more than 4 characters and less than 35 characters
-                3) School Name should match this regex: ^[A-Za-z0-9 .'-]+$
-                4) School Email should match this regex: ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$
-                5) Email Domain should match this regex: ^[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$
-                6) School Email must belong to the same email domain
-                7) Address should have between 10 and 100 characters 
-                8) Address should match this regex: ^[A-Za-z0-9 ,./#-]+$
-                """
-        );
+        // JTextArea note = new JTextArea(
+        //         """
+        //         Rules for School Details:
+        //         1) All fields are required
+        //         2) School Name should have more than 4 characters and less than 35 characters
+        //         3) School Name should match this regex: ^[A-Za-z0-9 .'-]+$
+        //         4) School Email should match this regex: ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$
+        //         5) Email Domain should match this regex: ^[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$
+        //         6) School Email must belong to the same email domain
+        //         7) Address should have between 10 and 100 characters 
+        //         8) Address should match this regex: ^[A-Za-z0-9 ,./#-]+$
+        //         """
+        // );
 
-        note.setEditable(false);
-        note.setLineWrap(true);
-        note.setWrapStyleWord(true);
-        note.setOpaque(false);
+        // note.setEditable(false);
+        // note.setLineWrap(true);
+        // note.setWrapStyleWord(true);
+        // note.setOpaque(false);
+
+        JLabel note = new JLabel(
+            """
+            <html>
+                <br />
+                <p>Rules for School Details:</p>
+                <p>1) All fields are required</p>
+                <p>2) School Name be between 4 and 35 characters</p>
+                <p>3) School Name should match this regex: ^[A-Za-z0-9 .'-]+$</p>
+                <p>4) School Email should match this regex: ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$</p>
+                <p>5) Email Domain should match this regex: ^[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$</p>
+                <p>6) School Email must belong to the same email domain</p>
+                <p>7) Address should be between 10 and 100 characters</p>
+                <p>8) Address should match this regex: ^[A-Za-z0-9 ,./#-]+$</p>
+            </html>
+            """
+        );
 
         constraints.gridx = 0;
         constraints.gridy = 6;
@@ -132,30 +150,37 @@ public class SchoolSignupUI extends JPanel {
     }
 
     private void registerSchool() {
-            // this.submitButton.setText("Attempting to register...");
-            String detailsValidError = SchoolRegistrationService.validateSchoolDetails(
+        Manager manager = (Manager) app.getCurrentUser();
+
+        if (manager == null) {
+            showError("There is no manager session. Please sign in as a school manager.");
+            return;
+        }
+
+        // this.submitButton.setText("Attempting to register...");
+        String detailsValidError = SchoolRegistrationService.validateSchoolDetails(
                                                                     schoolNameField.getText(), emailField.getText(),
                                                                     emailDomainField.getText(), addressField.getText());
 
-            if (detailsValidError == null) {
-                School school = new School(
-                                        schoolNameField.getText(),
-                                        emailField.getText(),
-                                        emailDomainField.getText(),
-                                        addressField.getText(),
-                                        "Pending"
-                                    );
-                if (new SchoolRegistrationService().registerSchool(school)) {
-                    JOptionPane.showMessageDialog(this, "School registration submitted.");
-                    clearForm();
-                    this.app.goBack();
-                } else {
-                    showError("School registration failed.");
-                }
+        if (detailsValidError == null) {
+            School school = new School(
+                                    schoolNameField.getText(),
+                                    emailField.getText(),
+                                    emailDomainField.getText(),
+                                    addressField.getText(),
+                                    "Pending"
+                                );
+            if (new SchoolRegistrationService().registerSchool(school)) {
+                JOptionPane.showMessageDialog(this, "School registration submitted.");
+                clearForm();
+                this.app.goBack();
             } else {
-                showError("School details validation failed.\nIssue: " + detailsValidError);
+                showError("School registration failed.");
             }
+        } else {
+            showError("School details validation failed.\nIssue: " + detailsValidError);
         }
+    }
 
     private void clearForm() {
         schoolNameField.setText("");
