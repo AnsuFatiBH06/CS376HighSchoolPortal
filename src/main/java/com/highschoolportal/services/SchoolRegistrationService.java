@@ -34,26 +34,26 @@ public class SchoolRegistrationService {
         }
 
         if (schoolName.length() < 4 || schoolName.length() > 35) {
-            return "School Name should have more than 4 letters and less than 35 letters";
+            return "School Name should be between 4 and 35 characters";
         }
 
         if(!schoolName.matches("^[A-Za-z0-9 .'-]+$")) {
             return "School name contains invalid characters.";
         }   
 
-        if (!email.contains("@")) {
-            //display error next to field
-            return "School Email should contain the character: '@'";
-        }
+        // if (!email.contains("@")) {
+        //     //display error next to field
+        //     return "School Email should contain the character: '@'";
+        // }
 
         if(!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             return "Enter a valid school email.";
         }
 
-        if (!emailDomain.contains(".")) {
-            //display error next to field
-            return "Email Domain should contain '.' at least once.";
-        }
+        // if (!emailDomain.contains(".")) {
+        //     //display error next to field
+        //     return "Email Domain should contain '.' at least once.";
+        // }
 
         if(!emailDomain.matches("^[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
             return "Enter a valid email domain.";
@@ -66,7 +66,7 @@ public class SchoolRegistrationService {
         }
 
         if (address.length() < 10 || address.length() > 100) {
-            return "Address should have more than 10 characters and less than 100 characters";
+            return "Address should be between 10 and 100 characters";
         }
 
         if(!address.matches("^[A-Za-z0-9 ,./#-]+$")) {

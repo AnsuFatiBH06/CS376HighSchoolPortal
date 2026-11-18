@@ -46,9 +46,30 @@ public class SchoolSignupUI extends JPanel {
         addField(form, constraints, 2, "Email Domain (e.g. strath.ac.uk)", emailDomainField);
         addField(form, constraints, 3, "School Address", addressField);
 
+        JTextArea note = new JTextArea(
+                """
+                Rules for School Details:
+                1) All fields are required
+                2) School Name should have more than 4 characters and less than 35 characters
+                3) School Name should match this regex: ^[A-Za-z0-9 .'-]+$
+                4) School Email should match this regex: ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$
+                5) Email Domain should match this regex: ^[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$
+                6) School Email must belong to the same email domain
+                7) Address should have between 10 and 100 characters 
+                8) Address should match this regex: ^[A-Za-z0-9 ,./#-]+$
+                """
+        );
+
+        note.setEditable(false);
+        note.setLineWrap(true);
+        note.setWrapStyleWord(true);
+        note.setOpaque(false);
+
         constraints.gridx = 0;
         constraints.gridy = 6;
         constraints.gridwidth = 2;
+
+        form.add(note, constraints);
 
         JButton registerButton = new JButton("Register School");
         JButton clearButton = new JButton("Clear Selection");
@@ -75,8 +96,20 @@ public class SchoolSignupUI extends JPanel {
 
         add(bottom, BorderLayout.SOUTH);
 
-        registerButton.addActionListener(event -> registerSchool());
-        clearButton.addActionListener(event -> clearForm());
+
+        registerButton.addActionListener(event -> {
+            // int option = JOptionPane.showConfirmDialog(this, "Are you sure of submitting your School Details?", "Submit School Details", JOptionPane.YES_NO_OPTION);
+            if (showConfirmationPrompt("Are you sure of submitting your School Details?", 
+                                        "Submit School Details") == JOptionPane.YES_OPTION) {
+                registerSchool();
+            }
+        });
+        clearButton.addActionListener(event -> {
+            if (showConfirmationPrompt("Are you sure of clearing your current form", 
+                                        "Clear School Details") == JOptionPane.YES_OPTION) {
+                clearForm();
+            }
+        });
         backButton.addActionListener(event -> this.app.goBack());
     }
 
@@ -129,6 +162,15 @@ public class SchoolSignupUI extends JPanel {
         emailField.setText("");
         emailDomainField.setText("");
         addressField.setText("");
+    }
+
+    private int showConfirmationPrompt(String message, String title) {
+            return JOptionPane.showConfirmDialog(
+                this,
+                message,
+                title,
+                JOptionPane.YES_NO_OPTION
+        );
     }
 
     private void showError(String message) {
