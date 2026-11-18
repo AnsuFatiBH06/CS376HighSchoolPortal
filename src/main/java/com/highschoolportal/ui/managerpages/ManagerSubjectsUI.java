@@ -1,9 +1,11 @@
 package com.highschoolportal.ui.managerpages;
 
-import com.highschoolportal.app.App;
-import com.highschoolportal.model.Subject;
-import com.highschoolportal.model.Manager;
-import com.highschoolportal.services.SubjectManagementService;
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.sql.SQLException;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -15,12 +17,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.sql.SQLException;
-import java.util.List;
+
+import com.highschoolportal.app.App;
+import com.highschoolportal.model.Manager;
+import com.highschoolportal.model.Subject;
+import com.highschoolportal.services.SubjectManagementService;
 
 public class ManagerSubjectsUI extends JPanel {
 
@@ -93,17 +94,36 @@ public class ManagerSubjectsUI extends JPanel {
         addField(form, constraints, 0, "Subject Name", nameField);
         addField(form, constraints, 1, "Subject Code", codeField);
         addField(form, constraints, 2, "Optionality (core/optional)", optionalityField);
-        addField(form, constraints, 3, "Pass Mark (out of 100)", passMarkField);
-        addField(form, constraints, 4, "Maximum Mark (out of 100)", maxMarkField);
+        addField(form, constraints, 3, "Pass Mark (positive decimal)", passMarkField);
+        addField(form, constraints, 4, "Maximum Mark (positive decimal)", maxMarkField);
         addField(form, constraints, 5, "Number of exams for that subject", examSeriesNumberField);
 
         // JLabel note = new JLabel(
         //         "Rules are saved separately for each academic year."
         // );
 
+        JLabel note = new JLabel(
+            """
+            <html>
+                <br />
+                <p>Rules for Subject Details:</p>
+                <p>1) All fields are required</p>
+                <p>2) Subject Name should be between 3 and 45 characters</p>
+                <p>3) Subject Name should match this regex: ^[A-Za-z0-9 '&-]+$</p>
+                <p>4) Subject Code should be between 3 and 15 characters</p>
+                <p>5) Subject Code can only include uppercase letters, numbers, and hyphens</p>
+                <p>6) Pass and Max Marks should be positive decimal numbers</p>
+                <p>7) Pass Mark should not exceed Max Mark</p>
+                <p>8) Exam Series Number should be between 1 and 4</p>
+            </html>
+            """
+        );
+
         constraints.gridx = 0;
         constraints.gridy = 6;
         constraints.gridwidth = 2;
+
+        form.add(note, constraints);
 
         // form.add(note, constraints);
 
@@ -147,9 +167,21 @@ public class ManagerSubjectsUI extends JPanel {
 
         add(bottom, BorderLayout.SOUTH);
 
-        createButton.addActionListener(event -> createSubject());
+        createButton.addActionListener(event -> {
+            if (showConfirmationPrompt("Are you sure of creating this subject?",
+                                        "Confirm Subject Creation") == JOptionPane.YES_OPTION) {
+                createSubject();
+            }
+        });
+
         // updateButton.addActionListener(event -> updateSelectedRules());
-        clearButton.addActionListener(event -> clearForm());
+        clearButton.addActionListener(event -> {
+            if (showConfirmationPrompt("Are you sure of clearing your current form", 
+                                        "Clear School Details") == JOptionPane.YES_OPTION) {
+                clearForm();
+            }
+        });
+        
         backButton.addActionListener(event -> app.goBack());
 
         subjectsTable.getSelectionModel().addListSelectionListener(event -> {
@@ -203,27 +235,39 @@ public class ManagerSubjectsUI extends JPanel {
                 return;
             }
 
-            Subject created = subjectManagementService.createSubject(
-                    manager,
-                    nameField.getText(),
-                    codeField.getText(),
-                    isItCore,
-                    passMark,
-                    maxMark,
-                    examSeriesNumber
-            );
+            String detailsValidError = SubjectManagementService.validateSubject(
+                                                                                nameField.getText(),
+                                                                                codeField.getText(),
+                                                                                isItCore,
+                                                                                passMark,
+                                                                                maxMark,
+                                                                                examSeriesNumber
+                                                                            );
 
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Subject '" + created.getSubjectName()
-                            + "' was created successfully.",
-                    "Subject created",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+            if (detailsValidError == null) {
+                Subject created = subjectManagementService.createSubject(
+                        manager,
+                        nameField.getText(),
+                        codeField.getText(),
+                        isItCore,
+                        passMark,
+                        maxMark,
+                        examSeriesNumber
+                );
 
-            clearForm();
-            refreshSubjects();
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Subject '" + created.getSubjectName()
+                                + "' was created successfully.",
+                        "Subject created",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
 
+                clearForm();
+                refreshSubjects();
+            } else {
+                showError(detailsValidError);
+            }
         } catch (NumberFormatException exception) {
 
             showError(exception.getMessage());
@@ -237,66 +281,6 @@ public class ManagerSubjectsUI extends JPanel {
             showError(databaseErrorMessage(exception));
         }
     }
-
-    // private void updateSelectedRules() {
-
-    //     Manager manager = (Manager) app.getCurrentUser();
-
-    //     if (manager == null) {
-    //         showError(
-    //                 "There is no manager session. Please sign in as a school manager."
-    //         );
-    //         return;
-    //     }
-
-    //     if (selectedAcademicYearID <= 0) {
-    //         showError("Select an academic year from the table first.");
-    //         return;
-    //     }
-
-    //     try {
-    //         int minOptional = parseInteger(
-    //                 minOptionalField, "Minimum optional subjects"
-    //         );
-
-    //         int maxOptional = parseInteger(
-    //                 maxOptionalField, "Maximum optional subjects"
-    //         );
-
-    //         int requiredPassed = parseInteger(
-    //                 requiredPassedField, "Required passed subjects"
-    //         );
-
-    //         businessRuleService.updateRules(
-    //                 manager,
-    //                 selectedAcademicYearID,
-    //                 minOptional,
-    //                 maxOptional,
-    //                 requiredPassed
-    //         );
-
-    //         JOptionPane.showMessageDialog(
-    //                 this,
-    //                 "Academic-year rules updated successfully.",
-    //                 "Rules updated",
-    //                 JOptionPane.INFORMATION_MESSAGE
-    //         );
-
-    //         refreshAcademicYears();
-
-    //     } catch (NumberFormatException exception) {
-
-    //         showError(exception.getMessage());
-
-    //     } catch (IllegalArgumentException | IllegalStateException exception) {
-
-    //         showError(exception.getMessage());
-
-    //     } catch (SQLException exception) {
-
-    //         showError(databaseErrorMessage(exception));
-    //     }
-    // }
 
     private float parseFloat(JTextField field, String fieldName) {
         try {
@@ -383,6 +367,15 @@ public class ManagerSubjectsUI extends JPanel {
         passMarkField.setText("60.0");
         maxMarkField.setText("100.0");
         examSeriesNumberField.setText("1");
+    }
+
+    private int showConfirmationPrompt(String message, String title) {
+            return JOptionPane.showConfirmDialog(
+                this,
+                message,
+                title,
+                JOptionPane.YES_NO_OPTION
+        );
     }
 
     private void showError(String message) {
