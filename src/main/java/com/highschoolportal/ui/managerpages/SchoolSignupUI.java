@@ -100,36 +100,43 @@ public class SchoolSignupUI extends JPanel {
 
     private void registerSchool() {
             // this.submitButton.setText("Attempting to register...");
-            boolean detailsValid = SchoolRegistrationService.validateSchoolDetails(
-                                        this.schoolNameField,
-                                        this.emailField,
-                                        this.emailDomainField,
-                                        this.addressField
-                                    );
+            String detailsValidError = SchoolRegistrationService.validateSchoolDetails(
+                                                                    schoolNameField.getText(), emailField.getText(),
+                                                                    emailDomainField.getText(), addressField.getText());
 
-            if (detailsValid) {
+            if (detailsValidError == null) {
                 School school = new School(
-                                        this.schoolNameField.getText(),
-                                        this.emailField.getText(),
-                                        this.emailDomainField.getText(),
-                                        this.addressField.getText(),
+                                        schoolNameField.getText(),
+                                        emailField.getText(),
+                                        emailDomainField.getText(),
+                                        addressField.getText(),
                                         "Pending"
                                     );
                 if (new SchoolRegistrationService().registerSchool(school)) {
                     JOptionPane.showMessageDialog(this, "School registration submitted.");
+                    clearForm();
                     this.app.goBack();
                 } else {
-                    JOptionPane.showMessageDialog(this, "School registration failed.");
+                    showError("School registration failed.");
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "School details validation failed.");
+                showError("School details validation failed.\nIssue: " + detailsValidError);
             }
         }
 
-        private void clearForm() {
-            schoolNameField.setText("");
-            emailField.setText("");
-            emailDomainField.setText("");
-            addressField.setText("");
-        }
+    private void clearForm() {
+        schoolNameField.setText("");
+        emailField.setText("");
+        emailDomainField.setText("");
+        addressField.setText("");
+    }
+
+    private void showError(String message) {
+            JOptionPane.showMessageDialog(
+                this,
+                message,
+                "School Management",
+                JOptionPane.ERROR_MESSAGE
+        );
+    }
 }
