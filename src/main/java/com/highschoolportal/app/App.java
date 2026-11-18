@@ -13,6 +13,7 @@ import com.highschoolportal.ui.adminpages.*;
 import com.highschoolportal.ui.managerpages.*;
 import com.highschoolportal.ui.studentpages.*;
 import com.highschoolportal.ui.teacherpages.*;
+import com.highschoolportal.ui.shared.*;
 
 public class App {
 
