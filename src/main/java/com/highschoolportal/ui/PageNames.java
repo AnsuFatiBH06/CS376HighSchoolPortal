@@ -16,6 +16,11 @@ public class PageNames {
     public static final String ADMIN_APPROVED_SCHOOLS = "ADMIN_APPROVED_SCHOOLS";
     public static final String ADMIN_PASSWORD_MANAGEMENT = "ADMIN_PASSWORD_MANAGEMENT";
 
+    // Password management (Sprint 2 Task Set 4)
+    public static final String PASSWORD_RESET_REQUEST = "PASSWORD_RESET_REQUEST";
+    public static final String UPDATE_PASSWORD = "UPDATE_PASSWORD";
+    public static final String MANAGER_PASSWORD_MANAGEMENT = "MANAGER_PASSWORD_MANAGEMENT";
+
     // Teacher Pages
     public static final String TEACHER_HOMEPAGE = "TEACHER_HOMEPAGE";
 
