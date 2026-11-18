@@ -94,8 +94,8 @@ public class ManagerSubjectsUI extends JPanel {
         addField(form, constraints, 0, "Subject Name", nameField);
         addField(form, constraints, 1, "Subject Code", codeField);
         addField(form, constraints, 2, "Optionality (core/optional)", optionalityField);
-        addField(form, constraints, 3, "Pass Mark (out of 100)", passMarkField);
-        addField(form, constraints, 4, "Maximum Mark (out of 100)", maxMarkField);
+        addField(form, constraints, 3, "Pass Mark (positive decimal)", passMarkField);
+        addField(form, constraints, 4, "Maximum Mark (positive decimal)", maxMarkField);
         addField(form, constraints, 5, "Number of exams for that subject", examSeriesNumberField);
 
         // JLabel note = new JLabel(
