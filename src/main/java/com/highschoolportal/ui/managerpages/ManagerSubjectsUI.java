@@ -22,6 +22,7 @@ import com.highschoolportal.app.App;
 import com.highschoolportal.model.Manager;
 import com.highschoolportal.model.Subject;
 import com.highschoolportal.services.SubjectManagementService;
+import com.highschoolportal.ui.RulesDialog;
 
 public class ManagerSubjectsUI extends JPanel {
 
@@ -34,6 +35,22 @@ public class ManagerSubjectsUI extends JPanel {
     private final JTextField passMarkField = new JTextField("60.0", 18);
     private final JTextField maxMarkField = new JTextField("100.0", 18);
     private final JTextField examSeriesNumberField = new JTextField("1", 18);
+
+    JLabel ruleSet = new JLabel(
+            """
+            <html>
+                <br />
+                <p>1) All fields are required</p>
+                <p>2) Subject Name should be between 3 and 45 characters</p>
+                <p>3) Subject Name should match this regex:<br />^[A-Za-z0-9 '&-]+$</p>
+                <p>4) Subject Code should be between 3 and 15 characters</p>
+                <p>5) Subject Code can only include uppercase letters, numbers, and hyphens</p>
+                <p>6) Pass and Max Marks should be positive decimal numbers</p>
+                <p>7) Pass Mark should not exceed Max Mark</p>
+                <p>8) Exam Series Number should be between 1 and 4</p>
+            </html>
+            """
+        );
 
     private final DefaultTableModel tableModel = new DefaultTableModel(
             new Object[]{
@@ -102,30 +119,12 @@ public class ManagerSubjectsUI extends JPanel {
         //         "Rules are saved separately for each academic year."
         // );
 
-        JLabel note = new JLabel(
-            """
-            <html>
-                <br />
-                <p>Rules for Subject Details:</p>
-                <p>1) All fields are required</p>
-                <p>2) Subject Name should be between 3 and 45 characters</p>
-                <p>3) Subject Name should match this regex: ^[A-Za-z0-9 '&-]+$</p>
-                <p>4) Subject Code should be between 3 and 15 characters</p>
-                <p>5) Subject Code can only include uppercase letters, numbers, and hyphens</p>
-                <p>6) Pass and Max Marks should be positive decimal numbers</p>
-                <p>7) Pass Mark should not exceed Max Mark</p>
-                <p>8) Exam Series Number should be between 1 and 4</p>
-            </html>
-            """
-        );
-
         constraints.gridx = 0;
         constraints.gridy = 6;
         constraints.gridwidth = 2;
 
-        form.add(note, constraints);
-
-        // form.add(note, constraints);
+        JButton ruleSetButton = new JButton("View Subject Rules");
+        form.add(ruleSetButton, constraints);
 
         JButton createButton = new JButton("Create Subject");
         // JButton updateButton = new JButton("Update Selected Subject's Properties");
@@ -167,6 +166,10 @@ public class ManagerSubjectsUI extends JPanel {
 
         add(bottom, BorderLayout.SOUTH);
 
+        ruleSetButton.addActionListener(event -> {
+            new RulesDialog(app.getCurrentFrame(), "Subject Creation Rules", ruleSet.getText());
+        });
+
         createButton.addActionListener(event -> {
             if (showConfirmationPrompt("Are you sure of creating this subject?",
                                         "Confirm Subject Creation") == JOptionPane.YES_OPTION) {
@@ -174,7 +177,6 @@ public class ManagerSubjectsUI extends JPanel {
             }
         });
 
-        // updateButton.addActionListener(event -> updateSelectedRules());
         clearButton.addActionListener(event -> {
             if (showConfirmationPrompt("Are you sure of clearing your current form", 
                                         "Clear School Details") == JOptionPane.YES_OPTION) {
