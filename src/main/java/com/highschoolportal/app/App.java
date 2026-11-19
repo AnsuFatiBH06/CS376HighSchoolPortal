@@ -53,6 +53,10 @@ public class App {
         mainFrame.setVisible(true);
     }
 
+    public JFrame getCurrentFrame() {
+        return mainFrame;
+    }
+
     public User getCurrentUser() {
         return currentUser;
     }

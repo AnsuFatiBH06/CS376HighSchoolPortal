@@ -6,6 +6,7 @@ import com.highschoolportal.app.App;
 import com.highschoolportal.services.SchoolRegistrationService;
 import com.highschoolportal.model.Manager;
 import com.highschoolportal.model.School;
+import com.highschoolportal.ui.RulesDialog;
 
 public class SchoolSignupUI extends JPanel {
     private App app;
@@ -13,7 +14,25 @@ public class SchoolSignupUI extends JPanel {
     private JTextField schoolNameField = new JTextField(18);
     private JTextField emailField = new JTextField(18);
     private JTextField emailDomainField = new JTextField(18);
-    private JTextField addressField = new JTextField(18);;
+    private JTextField addressField = new JTextField(18);
+
+    private JLabel ruleSet = new JLabel(
+            """
+            <html>
+                <body>
+                    <br />
+                    <p>1) All fields are required</p>
+                    <p>2) School Name be between 4 and 35 characters</p>
+                    <p>3) School Name should match this regex:<br />^[A-Za-z0-9 .'-]+$</p>
+                    <p>4) School Email should match this regex:<br />^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$</p>
+                    <p>5) Email Domain should match this regex:<br />^[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$</p>
+                    <p>6) School Email must belong to the same email domain</p>
+                    <p>7) Address should be between 10 and 100 characters</p>
+                    <p>8) Address should match this regex:<br />^[A-Za-z0-9 ,./#-]+$</p>
+                </body>
+            </html>
+            """
+        );
 
     public SchoolSignupUI(App app) {
         this.app = app;
@@ -66,28 +85,12 @@ public class SchoolSignupUI extends JPanel {
         // note.setWrapStyleWord(true);
         // note.setOpaque(false);
 
-        JLabel note = new JLabel(
-            """
-            <html>
-                <br />
-                <p>Rules for School Details:</p>
-                <p>1) All fields are required</p>
-                <p>2) School Name be between 4 and 35 characters</p>
-                <p>3) School Name should match this regex: ^[A-Za-z0-9 .'-]+$</p>
-                <p>4) School Email should match this regex: ^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$</p>
-                <p>5) Email Domain should match this regex: ^[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$</p>
-                <p>6) School Email must belong to the same email domain</p>
-                <p>7) Address should be between 10 and 100 characters</p>
-                <p>8) Address should match this regex: ^[A-Za-z0-9 ,./#-]+$</p>
-            </html>
-            """
-        );
-
         constraints.gridx = 0;
         constraints.gridy = 6;
         constraints.gridwidth = 2;
 
-        form.add(note, constraints);
+        JButton ruleSetButton = new JButton("View Registration Rules");
+        form.add(ruleSetButton, constraints);
 
         JButton registerButton = new JButton("Register School");
         JButton clearButton = new JButton("Clear Selection");
@@ -99,7 +102,7 @@ public class SchoolSignupUI extends JPanel {
 
         JPanel formContainer = new JPanel(new BorderLayout(5, 8));
 
-        formContainer.add(form, BorderLayout.CENTER);
+        formContainer.add(form, BorderLayout.NORTH);
         formContainer.add(actions, BorderLayout.SOUTH);
 
         content.add(formContainer, BorderLayout.NORTH);
@@ -114,7 +117,9 @@ public class SchoolSignupUI extends JPanel {
 
         add(bottom, BorderLayout.SOUTH);
 
-
+        ruleSetButton.addActionListener(event -> {
+            new RulesDialog(app.getCurrentFrame(), "School Registration Rules", ruleSet.getText());
+        });
         registerButton.addActionListener(event -> {
             // int option = JOptionPane.showConfirmDialog(this, "Are you sure of submitting your School Details?", "Submit School Details", JOptionPane.YES_NO_OPTION);
             if (showConfirmationPrompt("Are you sure of submitting your School Details?", 
