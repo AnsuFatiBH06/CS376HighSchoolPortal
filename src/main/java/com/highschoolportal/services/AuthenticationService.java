@@ -5,27 +5,37 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 import com.highschoolportal.model.Credentials;
+import com.highschoolportal.model.User;
 import com.highschoolportal.repository.CredentialsRepository;
+import com.highschoolportal.repository.UserRepository;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
 public class AuthenticationService {
 
-    private final CredentialsRepository repository;
-
-    public AuthenticationService() {
-        this(new CredentialsRepository());
-    }
-
-    public AuthenticationService(CredentialsRepository repository) {
-        this.repository = repository;
-    }
+    private final CredentialsRepository credentialsRepository;
+    private final UserRepository userRepository;
 
     public record LoginResult(
-        int credentialsID,
+        User user,
         Credentials.Role role,
         boolean mustChangePassword
     ) {}
+
+    public AuthenticationService() {
+        this(
+            new CredentialsRepository(),
+            new UserRepository()
+        );
+    }
+
+    public AuthenticationService(
+            CredentialsRepository credentialsRepository,
+            UserRepository userRepository) {
+
+        this.credentialsRepository = credentialsRepository;
+        this.userRepository = userRepository;
+    }
 
     public Optional<LoginResult> login(
             String email,
@@ -38,7 +48,7 @@ public class AuthenticationService {
         }
 
         Optional<Credentials> account =
-                repository.findByEmail(email.trim());
+                credentialsRepository.findByEmail(email.trim());
 
         if (account.isEmpty()) {
             return Optional.empty();
@@ -50,24 +60,33 @@ public class AuthenticationService {
             return Optional.empty();
         }
 
-        boolean passwordMatches;
+        boolean matches;
 
         try {
-            passwordMatches = BCrypt.verifyer()
-                    .verify(password, credentials.getPasswordHash())
-                    .verified;
+            matches = BCrypt.verifyer()
+                .verify(password, credentials.getPasswordHash())
+                .verified;
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
 
-        if (!passwordMatches) {
+        if (!matches) {
+            return Optional.empty();
+        }
+
+        Optional<User> user = userRepository.findByCredentialsId(
+            credentials.getId(),
+            credentials.getRole()
+        );
+
+        if (user.isEmpty()) {
             return Optional.empty();
         }
 
         return Optional.of(new LoginResult(
-                credentials.getId(),
-                credentials.getRole(),
-                credentials.mustChangePassword()
+            user.get(),
+            credentials.getRole(),
+            credentials.mustChangePassword()
         ));
     }
 }
