@@ -6,14 +6,23 @@ import java.util.Stack;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import com.highschoolportal.model.Credentials;
 import com.highschoolportal.model.User;
-
+import com.highschoolportal.services.AuthenticationService;
 import com.highschoolportal.ui.PageNames;
-import com.highschoolportal.ui.adminpages.*;
-import com.highschoolportal.ui.managerpages.*;
-import com.highschoolportal.ui.studentpages.*;
-import com.highschoolportal.ui.teacherpages.*;
-import com.highschoolportal.ui.shared.*;
+import com.highschoolportal.ui.adminpages.ApprovedSchoolsUI;
+import com.highschoolportal.ui.adminpages.PendingSchoolsUI;
+import com.highschoolportal.ui.adminpages.SystemAdminHomePageUI;
+import com.highschoolportal.ui.managerpages.BusinessRuleUI;
+import com.highschoolportal.ui.managerpages.ManagerHomePageUI;
+import com.highschoolportal.ui.managerpages.ManagerPasswordManagementUI;
+import com.highschoolportal.ui.managerpages.ManagerSubjectsUI;
+import com.highschoolportal.ui.managerpages.SchoolSignupUI;
+import com.highschoolportal.ui.shared.LoginUI;
+import com.highschoolportal.ui.shared.PasswordResetRequestUI;
+import com.highschoolportal.ui.shared.UpdatePasswordUI;
+import com.highschoolportal.ui.studentpages.StudentHomePageUI;
+import com.highschoolportal.ui.teacherpages.TeacherHomePageUI;
 
 public class App {
 
@@ -22,11 +31,12 @@ public class App {
     private final JPanel innerContainer;
     private final Stack<String> pageHistory;
     private User currentUser;
+    private Credentials.Role currentRole;
+    private boolean passwordChangeRequired;
 
     // public App() {
     //     this(null);
     // }
-
     public App() {
 
         pageHistory = new Stack<>();
@@ -47,7 +57,7 @@ public class App {
         // this code segment should be implemented in LoginUI, but right now we're testing things out
         // In LoginUI, we need to know the user role so that we create the correct object and open the right homepage.
         // LoginUI could/maybe should use setCurrentUser() method ======> app.setCurrentUser(new Manager(.....))
-        showPage(PageNames.MANAGER_HOMEPAGE);
+        showPage(PageNames.LOGIN);
 
         // keep this segment
         mainFrame.setVisible(true);
@@ -67,8 +77,44 @@ public class App {
 
     public void showPage(String pageName) {
 
-        cardLayout.show(innerContainer, pageName);
+        if (currentUser == null) {
+            boolean publicPage
+                    = pageName.equals(PageNames.LOGIN)
+                    || pageName.equals(PageNames.MANAGER_SCHOOL_SIGNUP)
+                    || pageName.equals(PageNames.PASSWORD_RESET_REQUEST);
 
+            if (!publicPage) {
+                pageName = PageNames.LOGIN;
+            }
+        } else if (passwordChangeRequired) {
+            pageName = PageNames.UPDATE_PASSWORD;
+        }
+
+        if (currentUser != null && !passwordChangeRequired) {
+
+            boolean allowed = switch (pageName) {
+                case PageNames.ADMIN_HOMEPAGE ->
+                    currentRole == Credentials.Role.Admin;
+
+                case PageNames.MANAGER_HOMEPAGE ->
+                    currentRole == Credentials.Role.Manager;
+
+                case PageNames.TEACHER_HOMEPAGE ->
+                    currentRole == Credentials.Role.Teacher;
+
+                case PageNames.STUDENT_HOMEPAGE ->
+                    currentRole == Credentials.Role.Student;
+
+                default ->
+                    true;
+            };
+
+            if (!allowed) {
+                return;
+            }
+        }
+
+        cardLayout.show(innerContainer, pageName);
         pageHistory.push(pageName);
     }
 
@@ -78,12 +124,13 @@ public class App {
         }
 
         pageHistory.pop();
-        String previousPage = pageHistory.peek();
-        
-        cardLayout.show(innerContainer, previousPage);
+        String previousPage = pageHistory.pop();
+
+        showPage(previousPage);
     }
 
     private void addPages() {
+        innerContainer.add(new LoginUI(this), PageNames.LOGIN);
         // Admin Pages
         innerContainer.add(new SystemAdminHomePageUI(this), PageNames.ADMIN_HOMEPAGE);
         innerContainer.add(new ApprovedSchoolsUI(this), PageNames.ADMIN_APPROVED_SCHOOLS);
@@ -101,6 +148,59 @@ public class App {
         innerContainer.add(new UpdatePasswordUI(this), PageNames.UPDATE_PASSWORD);
         innerContainer.add(new TeacherHomePageUI(this), PageNames.TEACHER_HOMEPAGE);
         innerContainer.add(new StudentHomePageUI(this), PageNames.STUDENT_HOMEPAGE);
+    }
+
+    public void completeLogin(
+            AuthenticationService.LoginResult result) {
+
+        currentUser = result.user();
+        currentRole = result.role();
+        passwordChangeRequired = result.mustChangePassword();
+
+        pageHistory.clear();
+
+        if (passwordChangeRequired) {
+            showPage(PageNames.UPDATE_PASSWORD);
+        } else {
+            openHomePage();
+        }
+    }
+
+    private void openHomePage() {
+        if (currentUser == null || currentRole == null) {
+            showPage(PageNames.LOGIN);
+            return;
+        }
+
+        switch (currentRole) {
+            case Admin ->
+                showPage(PageNames.ADMIN_HOMEPAGE);
+            case Manager ->
+                showPage(PageNames.MANAGER_HOMEPAGE);
+            case Teacher ->
+                showPage(PageNames.TEACHER_HOMEPAGE);
+            case Student ->
+                showPage(PageNames.STUDENT_HOMEPAGE);
+        }
+    }
+
+    public void passwordChangeCompleted() {
+        if (currentUser == null || !passwordChangeRequired) {
+            return;
+        }
+
+        passwordChangeRequired = false;
+        pageHistory.clear();
+        openHomePage();
+    }
+
+    public void logout() {
+        currentUser = null;
+        currentRole = null;
+        passwordChangeRequired = false;
+
+        pageHistory.clear();
+        showPage(PageNames.LOGIN);
     }
 
     public static void main(String[] args) {

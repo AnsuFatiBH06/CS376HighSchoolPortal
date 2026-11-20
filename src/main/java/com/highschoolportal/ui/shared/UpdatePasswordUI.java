@@ -1,13 +1,22 @@
 package com.highschoolportal.ui.shared;
 
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.util.Arrays;
+
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.border.EmptyBorder;
+
 import com.highschoolportal.app.App;
 import com.highschoolportal.model.User;
 import com.highschoolportal.services.PasswordResetService;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.util.Arrays;
 
 public class UpdatePasswordUI extends JPanel {
     private final App app;
@@ -61,6 +70,8 @@ public class UpdatePasswordUI extends JPanel {
             currentPasswordField.setText("");
             newPasswordField.setText("");
             confirmPasswordField.setText("");
+
+            app.passwordChangeCompleted();
         } catch (Exception exception) {
             JOptionPane.showMessageDialog(this, exception.getMessage(),
                     "Update Password", JOptionPane.WARNING_MESSAGE);
