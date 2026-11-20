@@ -4,11 +4,14 @@ import java.awt.CardLayout;
 import java.util.Stack;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 
 import com.highschoolportal.model.Credentials;
 import com.highschoolportal.model.User;
 import com.highschoolportal.services.AuthenticationService;
+import com.highschoolportal.services.RememberMeCoordinator;
 import com.highschoolportal.ui.PageNames;
 import com.highschoolportal.ui.adminpages.ApprovedSchoolsUI;
 import com.highschoolportal.ui.adminpages.PendingSchoolsUI;
@@ -33,6 +36,8 @@ public class App {
     private User currentUser;
     private Credentials.Role currentRole;
     private boolean passwordChangeRequired;
+    private final RememberMeCoordinator rememberMe
+            = new RememberMeCoordinator();
 
     // public App() {
     //     this(null);
@@ -61,6 +66,7 @@ public class App {
 
         // keep this segment
         mainFrame.setVisible(true);
+        restoreRememberedLogin();
     }
 
     public JFrame getCurrentFrame() {
@@ -201,6 +207,63 @@ public class App {
 
         pageHistory.clear();
         showPage(PageNames.LOGIN);
+
+        new SwingWorker<Void, Void>() {
+
+            @Override
+            protected Void doInBackground() throws Exception {
+                rememberMe.forget();
+                return null;
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    get();
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(
+                            mainFrame,
+                            "Logged out locally, but session revocation "
+                            + "could not be confirmed.",
+                            "Logout Warning",
+                            JOptionPane.WARNING_MESSAGE
+                    );
+                }
+            }
+        }.execute();
+
+    }
+
+    private void restoreRememberedLogin() {
+
+        new SwingWorker<
+            java.util.Optional<AuthenticationService.LoginResult>, Void>() {
+
+            @Override
+            protected java.util.Optional<
+                AuthenticationService.LoginResult>
+                    doInBackground() throws Exception {
+
+                return rememberMe.restore();
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    var result = get();
+
+                    if (result.isPresent() && currentUser == null) {
+                        completeLogin(result.get());
+                    }
+
+                } catch (Exception e) {
+                    System.err.println(
+                            "Remember Me restoration failed: "
+                            + e.getMessage()
+                    );
+                }
+            }
+        }.execute();
     }
 
     public static void main(String[] args) {

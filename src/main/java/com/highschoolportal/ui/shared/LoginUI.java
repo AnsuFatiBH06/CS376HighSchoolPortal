@@ -1,29 +1,44 @@
-
 package com.highschoolportal.ui.shared;
+
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.util.Arrays;
+import java.util.Optional;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
+import javax.swing.border.EmptyBorder;
 
 import com.highschoolportal.app.App;
 import com.highschoolportal.services.AuthenticationService;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.Optional;
+import com.highschoolportal.services.RememberMeCoordinator;
 
 public class LoginUI extends JPanel {
 
     private final App app;
     private final AuthenticationService authService;
 
-    private final JTextField emailField =
-            new JTextField(25);
+    private final JTextField emailField
+            = new JTextField(25);
 
-    private final JPasswordField passwordField =
-            new JPasswordField(25);
+    private final JPasswordField passwordField
+            = new JPasswordField(25);
 
-    private final JButton loginButton =
-            new JButton("Login");
+    private final JButton loginButton
+            = new JButton("Login");
+
+    private final JCheckBox rememberMeCheckBox
+            = new JCheckBox("Remember me for 30 days");
 
     public LoginUI(App app) {
         this.app = app;
@@ -45,8 +60,8 @@ public class LoginUI extends JPanel {
         c.insets = new Insets(10, 12, 10, 12);
         c.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel heading =
-                new JLabel("Welcome to HSPS", SwingConstants.CENTER);
+        JLabel heading
+                = new JLabel("Welcome to HSPS", SwingConstants.CENTER);
 
         heading.setFont(
                 heading.getFont().deriveFont(Font.BOLD, 22f)
@@ -74,6 +89,10 @@ public class LoginUI extends JPanel {
 
         c.gridy = 3;
         c.gridx = 1;
+        form.add(rememberMeCheckBox, c);
+
+        c.gridy = 4;
+        c.gridx = 1;
         form.add(loginButton, c);
 
         add(form);
@@ -100,17 +119,31 @@ public class LoginUI extends JPanel {
         }
 
         loginButton.setEnabled(false);
+        boolean remember = rememberMeCheckBox.isSelected();
 
         SwingWorker<
-                Optional<AuthenticationService.LoginResult>,
-                Void> worker = new SwingWorker<>() {
+                Optional<AuthenticationService.LoginResult>, Void> worker = new SwingWorker<>() {
 
             @Override
+
             protected Optional<AuthenticationService.LoginResult>
-                    doInBackground() throws SQLException {
+                    doInBackground() throws Exception {
 
                 try {
-                    return authService.login(email, password);
+                    Optional<AuthenticationService.LoginResult> result
+                            = authService.login(email, password);
+
+                    if (result.isPresent()
+                            && remember
+                            && !result.get().mustChangePassword()) {
+
+                        new RememberMeCoordinator().remember(
+                                result.get().user().getCredentialsID()
+                        );
+                    }
+
+                    return result;
+
                 } finally {
                     Arrays.fill(password, '\0');
                 }
@@ -122,8 +155,7 @@ public class LoginUI extends JPanel {
                 passwordField.setText("");
 
                 try {
-                    Optional<AuthenticationService.LoginResult>
-                            result = get();
+                    Optional<AuthenticationService.LoginResult> result = get();
 
                     if (result.isEmpty()) {
                         JOptionPane.showMessageDialog(

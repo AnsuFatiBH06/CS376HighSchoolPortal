@@ -1,4 +1,3 @@
-
 package com.highschoolportal.services;
 
 import java.sql.SQLException;
@@ -17,15 +16,15 @@ public class AuthenticationService {
     private final UserRepository userRepository;
 
     public record LoginResult(
-        User user,
-        Credentials.Role role,
-        boolean mustChangePassword
-    ) {}
+            User user,
+            Credentials.Role role,
+            boolean mustChangePassword
+            ) {}
 
     public AuthenticationService() {
         this(
-            new CredentialsRepository(),
-            new UserRepository()
+                new CredentialsRepository(),
+                new UserRepository()
         );
     }
 
@@ -47,8 +46,8 @@ public class AuthenticationService {
             return Optional.empty();
         }
 
-        Optional<Credentials> account =
-                credentialsRepository.findByEmail(email.trim());
+        Optional<Credentials> account
+                = credentialsRepository.findByEmail(email.trim());
 
         if (account.isEmpty()) {
             return Optional.empty();
@@ -64,8 +63,7 @@ public class AuthenticationService {
 
         try {
             matches = BCrypt.verifyer()
-                .verify(password, credentials.getPasswordHash())
-                .verified;
+                    .verify(password, credentials.getPasswordHash()).verified;
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
@@ -75,8 +73,8 @@ public class AuthenticationService {
         }
 
         Optional<User> user = userRepository.findByCredentialsId(
-            credentials.getId(),
-            credentials.getRole()
+                credentials.getId(),
+                credentials.getRole()
         );
 
         if (user.isEmpty()) {
@@ -84,9 +82,40 @@ public class AuthenticationService {
         }
 
         return Optional.of(new LoginResult(
-            user.get(),
-            credentials.getRole(),
-            credentials.mustChangePassword()
+                user.get(),
+                credentials.getRole(),
+                credentials.mustChangePassword()
         ));
     }
+
+    public Optional<LoginResult> restoreLogin(int credentialsID)
+            throws SQLException {
+
+        Optional<Credentials> account
+                = credentialsRepository.findById(credentialsID);
+
+        if (account.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Credentials credentials = account.get();
+
+        if (!credentials.isActive()
+                || credentials.mustChangePassword()) {
+            return Optional.empty();
+        }
+
+        Optional<User> user
+                = userRepository.findByCredentialsId(
+                        credentials.getId(),
+                        credentials.getRole()
+                );
+
+        return user.map(value -> new LoginResult(
+                value,
+                credentials.getRole(),
+                false
+        ));
+    }
+
 }
