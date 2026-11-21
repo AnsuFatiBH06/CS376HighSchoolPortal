@@ -355,8 +355,23 @@ public class StudentManagementService {
         }
     }
 
-    
+    // Finds the name of the selected academic year
+    private String findAcademicYearName(Connection connection, int academicYearID)
+            throws SQLException {
 
+        String sql = "SELECT Name FROM AcademicYear WHERE AcademicYearID = ?";
 
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, academicYearID);
 
-}
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new IllegalArgumentException("The academic year was not found.");
+                }
+
+                return result.getString("Name");
+            }
+        }
+    }
+} 
+
