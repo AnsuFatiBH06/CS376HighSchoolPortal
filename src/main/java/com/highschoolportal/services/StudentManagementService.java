@@ -267,4 +267,38 @@ public class StudentManagementService {
             }
         }
     }
+
+    // Creates a student record
+    private int createStudent(Connection connection, String firstName, String lastName,
+                              String email, Date dateOfBirth, int schoolID,
+                              int credentialsID) throws SQLException {
+
+        String sql = """
+                INSERT INTO Student
+                (FName, LName, Email, DOB, SchoolID, CredentialsID)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(
+                sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            statement.setString(1, firstName.trim());
+            statement.setString(2, lastName.trim());
+            statement.setString(3, email);
+            statement.setDate(4, dateOfBirth);
+            statement.setInt(5, schoolID);
+            statement.setInt(6, credentialsID);
+            statement.executeUpdate();
+
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                if (!keys.next()) {
+                    throw new SQLException("Student account could not be created.");
+                }
+
+                return keys.getInt(1);
+            }
+        }
+    }
+
+    
 }
