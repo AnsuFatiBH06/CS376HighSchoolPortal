@@ -2,12 +2,16 @@ package com.highschoolportal.services;
 
 import java.sql.Connection;
 import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 
 import com.highschoolportal.database.MySQLConnect;
 import com.highschoolportal.model.StudentEnrollmentRequest;
+
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
@@ -147,5 +151,26 @@ public class StudentManagementService {
         }
     }
 
-    
+    // Finds the school ID linked to the logged-in manager
+    private int findManagerSchoolID(int managerID) throws SQLException {
+
+        String sql = "SELECT SchoolID FROM Manager WHERE ManagerID = ?";
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+            PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, managerID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next() || result.getObject("SchoolID") == null) {
+                    throw new IllegalArgumentException(
+                        "The logged-in Manager is not linked to a school");
+                }
+
+                return result.getInt("SchoolID");
+            }
+        }
+    } 
+
+    // Finds the email domain belonging to the Manager's school
 }
