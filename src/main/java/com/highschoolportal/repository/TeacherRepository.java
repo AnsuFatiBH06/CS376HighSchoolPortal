@@ -1,5 +1,6 @@
 package com.highschoolportal.repository;
 
+import com.highschoolportal.database.MySQLConnect;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,9 +8,24 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 
-import com.highschoolportal.database.MySQLConnect;
-
 public class TeacherRepository {
+
+    @FunctionalInterface
+    public interface ConnectionProvider {
+        Connection open() throws SQLException;
+    }
+
+    private final ConnectionProvider connections;
+
+    public TeacherRepository() {
+        this(() -> MySQLConnect.getInstance().getConnection());
+    }
+
+    /** Supply an isolated database connection in integration tests. */
+    public TeacherRepository(ConnectionProvider connections) {
+        this.connections = java.util.Objects.requireNonNull(connections);
+    }
+
 
     public record CreatedTeacher(int teacherID, int credentialsID, int schoolID) {}
 
@@ -18,7 +34,7 @@ public class TeacherRepository {
             String email, LocalDate dateOfBirth, String passwordHash)
             throws SQLException {
 
-        try (Connection connection = MySQLConnect.getInstance().getConnection()) {
+        try (Connection connection = connections.open()) {
             connection.setAutoCommit(false);
             try {
                 int schoolID = getApprovedSchoolForManager(connection, managerID);
@@ -169,7 +185,7 @@ public class TeacherRepository {
                 ORDER BY t.LName, t.FName, t.TeacherID
                 """;
         java.util.List<TeacherOption> options = new java.util.ArrayList<>();
-        try (Connection connection = MySQLConnect.getInstance().getConnection();
+        try (Connection connection = connections.open();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, managerID);
             try (ResultSet result = statement.executeQuery()) {
@@ -199,7 +215,7 @@ public class TeacherRepository {
                 ORDER BY ay.Name, s.Name, say.SubjectAcademicYearID
                 """;
         java.util.List<SubjectOfferingOption> options = new java.util.ArrayList<>();
-        try (Connection connection = MySQLConnect.getInstance().getConnection();
+        try (Connection connection = connections.open();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, managerID);
             try (ResultSet result = statement.executeQuery()) {
@@ -241,7 +257,7 @@ public class TeacherRepository {
                   AND tc.Role = 'Teacher' AND tc.Status = 'Active'
                   AND sc.Status = 'Approved'
                 """;
-        try (Connection connection = MySQLConnect.getInstance().getConnection();
+        try (Connection connection = connections.open();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, teacherID);
             statement.setInt(2, managerID);
