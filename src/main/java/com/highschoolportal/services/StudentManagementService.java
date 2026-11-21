@@ -197,6 +197,28 @@ public class StudentManagementService {
                 return emailDomain.trim();
             }
 
+        }
     }
+
+    /** Generates a student email address using the school's email domain
+     * "John Shimmian", "delrey.com"
+     * returns the "john.shimmian@delrey.com" generated email
+     */ 
+    private String generatedStudentEmail(String firstName, String lastName, String emailDomain) {
+
+        // Remove spaces and convert the names to lowercase
+        String cleanedFirstName = firstName.trim().toLowerCase().replaceAll("\\s+", "");
+        String cleanedLastName = lastName.trim().toLowerCase().replaceAll("\\s+", "");
+
+        // Build the email address
+        String email = cleanedFirstName + "." + cleanedLastName + "@" + emailDomain;
+
+        // Ensure it follows the valid format
+        if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+            throw new IllegalArgumentException("The school email domain is invalid");
+        }
+
+        return email;
     }
+
 }
