@@ -326,6 +326,37 @@ public class StudentManagementService {
         }
     }
 
+    // Adds every core subect of the academic year to the student's curriculum
+     private void addCoreSubjectsToCurriculum(Connection connection,
+                                             int studentAcademicYearID,
+                                             int academicYearID,
+                                             String studentName,
+                                             String academicYearName) throws SQLException {
+
+        String sql = """
+                INSERT INTO Details
+                (StudentAcademicYearID, SubjectAcademicYearID,
+                 StudentNameSnapshot, TeacherNameSnapshot,
+                 SubjectNameSnapshot, AcademicYearNameSnapshot,
+                 AttendancePercentage, FinalMark, ResultStatus, IsFrozen)
+                SELECT ?, say.SubjectAcademicYearID, ?, NULL, s.Name, ?,
+                       NULL, NULL, 'Incomplete', FALSE
+                FROM SubjectAcademicYear say
+                JOIN Subject s ON s.SubjectID = say.SubjectID
+                WHERE say.AcademicYearID = ? AND say.IsCore = TRUE
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, studentAcademicYearID);
+            statement.setString(2, studentName);
+            statement.setString(3, academicYearName);
+            statement.setInt(4, academicYearID);
+            statement.executeUpdate();
+        }
+    }
+
     
+
+
 
 }
