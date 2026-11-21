@@ -1,12 +1,13 @@
 package com.highschoolportal.ui.managerpages;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import java.awt.Color;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 
 import com.highschoolportal.app.App;
 import com.highschoolportal.ui.PageNames;
@@ -54,25 +55,23 @@ public class ManagerHomePageUI extends JPanel {
         // add(schoolRegButton);
         // add(academicYearButton);
         // add(logoutButton);
-
-        schoolRegButton.addActionListener(event ->
-                this.app.showPage(PageNames.MANAGER_SCHOOL_SIGNUP)
+        schoolRegButton.addActionListener(event
+                -> this.app.showPage(PageNames.MANAGER_SCHOOL_SIGNUP)
         );
 
-        academicYearButton.addActionListener(event ->
-                this.app.showPage(PageNames.MANAGER_ACADEMIC_YEAR_MANAGEMENT)
+        academicYearButton.addActionListener(event
+                -> this.app.showPage(PageNames.MANAGER_ACADEMIC_YEAR_MANAGEMENT)
         );
 
-        subjectManagementButton.addActionListener(event ->
-                this.app.showPage(PageNames.MANAGER_SUBJECT_MANAGEMENT)
+        subjectManagementButton.addActionListener(event
+                -> this.app.showPage(PageNames.MANAGER_SUBJECT_MANAGEMENT)
         );
 
-        passwordRequestsButton.addActionListener(event ->
-                this.app.showPage(PageNames.MANAGER_PASSWORD_MANAGEMENT)
+        passwordRequestsButton.addActionListener(event
+                -> this.app.showPage(PageNames.MANAGER_PASSWORD_MANAGEMENT)
         );
 
-        logoutButton.addActionListener(event ->
-                this.app.showPage(PageNames.LOGIN)
-        );
+        logoutButton.addActionListener(event -> app.logout());
+
     }
 }
