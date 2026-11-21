@@ -12,7 +12,6 @@ import java.time.format.DateTimeParseException;
 import com.highschoolportal.database.MySQLConnect;
 import com.highschoolportal.model.StudentEnrollmentRequest;
 
-
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
 public class StudentManagementService {
@@ -244,5 +243,28 @@ public class StudentManagementService {
     }
 
     // Creates a student credentials record
+    private int createStudentCredentials(Connection connection, String passwordHash)
+            throws SQLException {
 
+            String sql = """
+                INSERT INTO Credentials
+                (PasswordHash, Role, MustChangePassword, Status)
+                VALUES (?, 'Student', TRUE, 'Active')
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(
+                sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            statement.setString(1, passwordHash);
+            statement.executeUpdate();
+
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                if (!keys.next()) {
+                    throw new SQLException("Student credentials could not be created.");
+                }
+
+                return keys.getInt(1);
+            }
+        }
+    }
 }
