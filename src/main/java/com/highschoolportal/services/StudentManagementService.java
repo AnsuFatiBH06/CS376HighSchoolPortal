@@ -173,4 +173,30 @@ public class StudentManagementService {
     } 
 
     // Finds the email domain belonging to the Manager's school
+    private String findSchoolEmailDomain(int schoolID) throws SQLException {
+
+        String sql = "SELECT EmailDomain FROM School WHERE SchoolID = ?";
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+        PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, schoolID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new IllegalArgumentException("The school was not found");
+                }
+
+                String emailDomain = result.getString("EmailDomain");
+
+                if (emailDomain == null || emailDomain.isBlank()) {
+                    throw new IllegalArgumentException(
+                        "The school does not have an email domain configured");
+                }
+
+                return emailDomain.trim();
+            }
+
+    }
+    }
 }
