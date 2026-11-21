@@ -9,6 +9,7 @@ public class PageNames {
     public static final String MANAGER_SCHOOL_SIGNUP = "SCHOOL_SIGNUP";
     public static final String MANAGER_ACADEMIC_YEAR_MANAGEMENT = "ACADEMIC_YEAR_MANAGEMENT";
     public static final String MANAGER_SUBJECT_MANAGEMENT = "SUBJECT_MANAGEMENT";
+    public static final String MANAGER_TEACHER_MANAGEMENT = "MANAGER_TEACHER_MANAGEMENT";
 
     // Admin Pages
     public static final String ADMIN_HOMEPAGE = "ADMIN_HOMEPAGE";
