@@ -47,4 +47,31 @@ public class TeacherManagementService {
                 manager.getUserID(), firstName.trim(), lastName.trim(),
                 email.trim(), dateOfBirth, hash);
     }
+
+    public java.util.List<TeacherRepository.TeacherOption> getTeachers(Manager manager)
+            throws SQLException {
+        validateManager(manager);
+        return repository.listTeachersForManager(manager.getUserID());
+    }
+
+    public java.util.List<TeacherRepository.SubjectOfferingOption> getSubjectOfferings(Manager manager)
+            throws SQLException {
+        validateManager(manager);
+        return repository.listSubjectOfferingsForManager(manager.getUserID());
+    }
+
+    public void assignTeacher(Manager manager, int teacherID, int subjectAcademicYearID)
+            throws SQLException {
+        validateManager(manager);
+        if (teacherID <= 0 || subjectAcademicYearID <= 0) {
+            throw new IllegalArgumentException("Select a teacher and a subject offering");
+        }
+        repository.assignTeacherForManager(manager.getUserID(), teacherID, subjectAcademicYearID);
+    }
+
+    private void validateManager(Manager manager) {
+        if (manager == null || manager.getUserID() <= 0 || manager.getSchoolID() <= 0) {
+            throw new IllegalArgumentException("An assigned school manager is required");
+        }
+    }
 }
