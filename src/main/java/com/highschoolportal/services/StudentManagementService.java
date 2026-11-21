@@ -221,4 +221,28 @@ public class StudentManagementService {
         return email;
     }
 
+    // Checks that the selected academic year belongs to the manager's school
+    private void ensureAcademicYearBelongsToSchool(Connection connection, int academicYearID, int schoolID) throws SQLException {
+
+        String sql = """
+        SELECT 1
+        FROM AcademicYear
+        WHERE AcademicYearID = ? AND SchoolID = ?
+        """;
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, academicYearID);
+            statement.setInt(2, schoolID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new IllegalArgumentException(
+                        "The selected academic year does not belong to your school");
+                }
+            }
+        }
+    }
+
+    // Creates a student credentials record
+
 }
