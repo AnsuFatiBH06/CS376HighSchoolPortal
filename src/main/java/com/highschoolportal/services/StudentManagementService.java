@@ -298,7 +298,34 @@ public class StudentManagementService {
                 return keys.getInt(1);
             }
         }
+        
+        // Enrolls the student in the selected academic year
+        private int createStudentAcademicYear(Connection connection, int studentID,
+                                          int academicYearID) throws SQLException {
+
+        String sql = """
+                INSERT INTO StudentAcademicYear
+                (StudentID, AcademicYearID, Grade, CertificateStatus)
+                VALUES (?, ?, NULL, 'Not Qualified')
+                """;
+
+        try (PreparedStatement statement = connection.prepareStatement(
+                sql, Statement.RETURN_GENERATED_KEYS)) {
+
+            statement.setInt(1, studentID);
+            statement.setInt(2, academicYearID);
+            statement.executeUpdate();
+
+            try (ResultSet keys = statement.getGeneratedKeys()) {
+                if (!keys.next()) {
+                    throw new SQLException("Student enrolment could not be created.");
+                }
+
+                return keys.getInt(1);
+            }
+        }
     }
 
     
+
 }
