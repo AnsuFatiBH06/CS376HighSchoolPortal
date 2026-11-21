@@ -1,12 +1,13 @@
 package com.highschoolportal.ui.adminpages;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.FlowLayout;
+
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import java.awt.Color;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 
 import com.highschoolportal.app.App;
 import com.highschoolportal.ui.PageNames;
@@ -36,7 +37,7 @@ public class SystemAdminHomePageUI extends JPanel {
         add(up, BorderLayout.NORTH);
 
         JPanel pages = new JPanel(new FlowLayout());
-        pendingSchoolsViewButton  = new JButton("Pending Schools");
+        pendingSchoolsViewButton = new JButton("Pending Schools");
         existingSchoolsViewButton = new JButton("Existing Schools");
         viewPasswordRequestsButton = new JButton("Password Reset Requests");
         logoutButton = new JButton("Logout");
@@ -51,21 +52,19 @@ public class SystemAdminHomePageUI extends JPanel {
         // add(existingSchoolsViewButton);
         // add(viewPasswordRequestsButton);
         // add(logoutButton);
-
-        pendingSchoolsViewButton.addActionListener(event ->
-                this.app.showPage(PageNames.ADMIN_PENDING_SCHOOLS)
+        pendingSchoolsViewButton.addActionListener(event
+                -> this.app.showPage(PageNames.ADMIN_PENDING_SCHOOLS)
         );
 
-        existingSchoolsViewButton.addActionListener(event ->
-                this.app.showPage(PageNames.ADMIN_APPROVED_SCHOOLS)
+        existingSchoolsViewButton.addActionListener(event
+                -> this.app.showPage(PageNames.ADMIN_APPROVED_SCHOOLS)
         );
 
-        viewPasswordRequestsButton.addActionListener(event ->
-                this.app.showPage(PageNames.ADMIN_PASSWORD_MANAGEMENT)
+        viewPasswordRequestsButton.addActionListener(event
+                -> this.app.showPage(PageNames.ADMIN_PASSWORD_MANAGEMENT)
         );
 
-        logoutButton.addActionListener(event ->
-                this.app.showPage(PageNames.LOGIN)
-        );
+        logoutButton.addActionListener(event -> app.logout());
+
     }
 }
