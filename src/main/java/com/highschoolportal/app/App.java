@@ -20,6 +20,7 @@ import com.highschoolportal.ui.managerpages.BusinessRuleUI;
 import com.highschoolportal.ui.managerpages.ManagerHomePageUI;
 import com.highschoolportal.ui.managerpages.ManagerPasswordManagementUI;
 import com.highschoolportal.ui.managerpages.ManagerSubjectsUI;
+import com.highschoolportal.ui.managerpages.ManagerTeacherUI;
 import com.highschoolportal.ui.managerpages.SchoolSignupUI;
 import com.highschoolportal.ui.shared.LoginUI;
 import com.highschoolportal.ui.shared.PasswordResetRequestUI;
@@ -148,6 +149,7 @@ public class App {
         innerContainer.add(new BusinessRuleUI(this), PageNames.MANAGER_ACADEMIC_YEAR_MANAGEMENT);
         innerContainer.add(new ManagerSubjectsUI(this), PageNames.MANAGER_SUBJECT_MANAGEMENT);
         innerContainer.add(new ManagerPasswordManagementUI(this), PageNames.MANAGER_PASSWORD_MANAGEMENT);
+        innerContainer.add(new ManagerTeacherUI(this), PageNames.MANAGER_TEACHER_MANAGEMENT);
 
         // Teacher and Student password pages
         innerContainer.add(new PasswordResetRequestUI(), PageNames.PASSWORD_RESET_REQUEST);
