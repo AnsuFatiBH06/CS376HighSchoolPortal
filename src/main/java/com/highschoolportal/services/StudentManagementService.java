@@ -126,6 +126,49 @@ public class StudentManagementService {
         }
     }
 
+    // Returns all students enrolled in the logged in manager's school
+    public List<StudentSummary> getAllStudents(int managerID) throws SQLException {
+
+        // Find the Manager's school so that only their own students are displayed
+        int schoolID = findManagerSchoolID(managerID);
+
+        String sql = """
+                SELECT DISTINCT
+                    s.StudentID,
+                    CONCAT(s.FName, ' ', s.LName) AS StudentName,
+                    s.Email,
+                    ay.Name AS AcademicYearName,
+                    say.CertificateStatus
+                FROM Student s
+                JOIN StudentAcademicYear say ON say.StudentID = s.StudentID
+                JOIN AcademicYear ay ON ay.AcademicYearID = say.AcademicYearID
+                WHERE s.SchoolID = ?
+                ORDER BY s.StudentID ASC
+                """;
+
+        List<StudentSummary> students = new ArrayList<>();
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, schoolID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    students.add(new StudentSummary(
+                            result.getInt("StudentID"),
+                            result.getString("StudentName"),
+                            result.getString("Email"),
+                            result.getString("AcademicYearName"),
+                            result.getString("CertificateStatus")
+                    ));
+                }
+            }
+        }
+
+        return students;
+    }
+
     /**
      * Validates the student details entered by a School Manager.
      *
