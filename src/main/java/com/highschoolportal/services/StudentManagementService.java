@@ -625,4 +625,62 @@ public class StudentManagementService {
         // Return only students who still need to select optional subjects
         return students;
     }
+
+    // Saves a notification for a student with an incomplete curriculum
+    public void notifyStudent(int managerID, int studentID, String message)
+            throws SQLException {
+
+        // Validate the notification before connecting to the database
+        String validationError = validateNotification(managerID, studentID, message);
+
+        if (validationError != null) {
+            throw new IllegalArgumentException(validationError);
+        }
+
+        String sql = """
+                INSERT INTO StudentNotification
+                (StudentID, ManagerID, Message, SentAt, IsRead)
+                VALUES (?, ?, ?, CURRENT_TIMESTAMP, FALSE)
+                """;
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, studentID);
+            statement.setInt(2, managerID);
+            statement.setString(3, message.trim());
+            statement.executeUpdate();
+        }
+    } 
+
+    // Returns unread notifications for a logged in student
+    public List<String> getStudentNotifications(int studentID) throws SQLException {
+
+        if (studentID <= 0) {
+            throw new IllegalArgumentException("A logged-in Student is required");
+        }
+
+        String sql = """
+                SELECT Message
+                FROM StudentNotification
+                WHERE StudentID = ? AND IsRead = FALSE
+                ORDER BY SentAt DESC
+                """;
+
+        List<String> notifications = new ArrayList<>();
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, studentID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    notifications.add(result.getString("Message"));
+                }
+            }
+        }
+
+        return notifications;
+    }
 }
