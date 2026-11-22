@@ -13,6 +13,7 @@ import java.util.List;
 
 import com.highschoolportal.database.MySQLConnect;
 import com.highschoolportal.model.StudentEnrollmentRequest;
+import com.highschoolportal.model.StudentSummary;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
@@ -486,5 +487,30 @@ public class StudentManagementService {
 
         // Return the filtered students; this may be empty if no students match
         return students;
+    }
+
+    // Validates the filters entered by a school manager
+    static String validateStudentFilters(String subjectCode, String certificateStatus) {
+
+        // The subject code is optional
+        if (subjectCode != null && !subjectCode.isBlank()) {
+
+            // Subject codes may contain letters, numbers and hyphens
+            if (!subjectCode.trim().matches("[A-Za-z0-9-]+")) {
+                return "Subject code contains invalid characters";
+            }
+        }
+
+        // The certificate status is optional
+        if (certificateStatus != null && !certificateStatus.isBlank()) {
+
+            // Certificate status may contain letters and spaces only
+            if (!certificateStatus.trim().matches("[A-Za-z ]+")) {
+                return "Certificate status contains invalid characters";
+            }
+        }
+
+        // Both filters are valid
+        return null;
     }
 }

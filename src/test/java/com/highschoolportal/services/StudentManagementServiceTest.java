@@ -94,4 +94,22 @@ class StudentManagementServiceTest {
                 1
         ).contains("Last name contains invalid characters"));
     }
+
+        @Test
+    void rejectsInvalidSubjectCodeFilter() {
+
+        assertTrue(StudentManagementService.validateStudentFilters(
+                "MATHS123!",
+                null
+        ).contains("Subject code contains invalid characters"));
+    }
+
+    @Test
+    void rejectsInvalidCertificateStatusFilter() {
+
+        assertTrue(StudentManagementService.validateStudentFilters(
+                null,
+                "Passed!"
+        ).contains("Certificate status contains invalid characters"));
+    }
 }
