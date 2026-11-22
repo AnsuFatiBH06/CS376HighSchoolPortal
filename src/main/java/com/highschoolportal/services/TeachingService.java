@@ -1,5 +1,11 @@
 package com.highschoolportal.services;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -97,5 +103,63 @@ public class TeachingService {
 
         // The upload details are valid
         return null;
+    }
+
+    // Uploading pdf teaching material for a subject
+    public String uploadTeachingMaterial(int teacherID, int subjectAcademicYearID, int weekNumber, File pdfFile)
+    throws SQLException, IOException {
+
+        // Validate the upload details before saving the file
+        String validationError = validateTeachingMaterialUpload(
+            teacherID, 
+            subjectAcademicYearID, 
+            weekNumber, 
+            pdfFile == null ? null : pdfFile.getName()
+        );
+
+        if (validationError != null) {
+            throw new IllegalArgumentException(validationError);
+        }
+
+        // Ensure the teacher is assigned to the selected subject
+        ensureTeacherAssignedToSubject(teacherID, subjectAcademicYearID);
+
+        // Create the uploads folder (if it doesn't already exist)
+        Path uploadFolder = Paths.geet("uploads", "teaching-materials");
+        Files.createDirectories(uploadFolder);
+
+        // Create a unique file name to prevent overwriting existing files
+        String originalFileName = pdfFile.getName();
+        String fileExtension = originalFileName.substring(
+                originalFileName.lastIndexOf("."));
+
+        String savedFileName = "teacher_" + teacherID
+                + "_subject_" + subjectAcademicYearID
+                + "_week_" + weekNumber
+                + "_" + System.currentTimeMillis()
+                + fileExtension;
+
+        // Save the pdf file
+        Path savedFilePath = uploadFolder.resolve(savedFileName);
+        Files.copy(pdfFile.toPath(), savedFilePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // Store the file location in the database
+        String sql = """
+                INSERT INTO TeachingMaterial
+                (TeacherID, SubjectAcademicYearID, WeekNumber, FilePath, UploadDate)
+                VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+                """;
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+            PreparedStatement statement = connection.PrepareStatement(sql)) {
+
+                statement.setInt(1, teacherID);
+                statement.setInt(2, subjectAcademicYearID);
+                statement.setInt(3, weekNumber);
+                statement.setString(4, savedFilePath.toString());
+                statement.executeUpdate();
+            }
+
+            return "Teaching material uploaded successfully for week " + weekNumber + "!";
     }
 }
