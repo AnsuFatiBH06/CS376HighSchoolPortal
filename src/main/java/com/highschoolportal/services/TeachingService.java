@@ -64,4 +64,38 @@ public class TeachingService {
 
             return students;
     }
+
+    // Validates the details for uploading a weekly teaching material
+    static String validateTeachingMaterialUpload(int teacherID,
+                                                 int subjectAcademicYearID,
+                                                 int weekNumber,
+                                                 String fileName) {
+        // A logged-in teacher is required
+        if (teacherID <= 0) {
+            return "A logged-in Teacher is required";
+        }
+
+        // A valid subject offering must be selected
+        if (subjectAcademicYearID <= 0) {
+            return "Select a subject";
+        }
+
+        // The week number must be positive
+        if (weekNumber <= 0) {
+            return "Enter a valid week number";
+        }
+
+        // A PDF file must be selected
+        if (fileName == null || fileName.isBlank()) {
+            return "Select a PDF file to upload";
+        }
+
+        // The file must be a PDF
+        if (!fileName.toLowerCase().endsWith(".pdf")) {
+            return "The teaching material must be a PDF file";
+        }
+
+        // The upload details are valid
+        return null;
+    }
 }
