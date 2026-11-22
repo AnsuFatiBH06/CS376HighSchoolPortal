@@ -83,4 +83,48 @@ class TeachingServiceTest {
                 "lecture.docx"
         ).contains("PDF file"));
     }
+
+    @Test
+    void rejectsInvalidStudentForTeachingMaterials() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new TeachingService().getStudentTeachingMaterials(0, 1)
+        );
+
+        assertTrue(exception.getMessage().contains("Student"));
+    }
+
+    @Test
+    void rejectsInvalidSubjectForTeachingMaterials() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new TeachingService().getStudentTeachingMaterials(1, 0)
+        );
+
+        assertTrue(exception.getMessage().contains("subject"));
+    }
+
+    @Test
+    void rejectsInvalidStudentForTeachingMaterialDownload() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new TeachingService().downloadTeachingMaterial(0, 1)
+        );
+
+        assertTrue(exception.getMessage().contains("Student"));
+    }
+
+    @Test
+    void rejectsInvalidMaterialForTeachingMaterialDownload() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new TeachingService().downloadTeachingMaterial(1, 0)
+        );
+
+        assertTrue(exception.getMessage().contains("teaching material"));
+    }
 }
