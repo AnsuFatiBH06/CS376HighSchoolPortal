@@ -18,7 +18,7 @@ public class StudentManagementService {
 
     // Creates a new student and enrolls the student in the selected academic year
     public int createStudentAndEnroll(int managerID, StudentEnrollmentRequest request)
-    throws SQLException {
+            throws SQLException {
 
         // Ensure that the manager entered valid details
         validateRequest(request);
@@ -31,31 +31,32 @@ public class StudentManagementService {
 
         // Generate the student's school email
         String email = generateStudentEmail(
-            request.getFirstName(),
-            request.getLastName(),
-            emailDomain
+                request.getFirstName(),
+                request.getLastName(),
+                emailDomain
         );
 
         // Use the student's date of birth as the temporary password
         String temporaryPassword = request.getDateOfBirth();
 
-        // Hash the password before storing
-        String passwordHash = BCrypt.withDefaults().hashToString(12, temporaryPassword.toCharArray());
+        // Hash the password before storing it
+        String passwordHash = BCrypt.withDefaults()
+                .hashToString(12, temporaryPassword.toCharArray());
 
         // Convert the date of birth into an SQL date
         Date dateOfBirth = Date.valueOf(LocalDate.parse(request.getDateOfBirth()));
 
         try (Connection connection = MySQLConnect.getInstance().getConnection()) {
 
-            // In case we need to revert
+            // Stop automatic commits so that all changes can be undone if needed
             connection.setAutoCommit(false);
 
-            // make sure the selected academic year belongs to the manager's school
             try {
+                // Make sure the selected academic year belongs to the manager's school
                 ensureAcademicYearBelongsToSchool(
-                    connection,
-                    request.getAcademicYearID(),
-                    schoolID
+                        connection,
+                        request.getAcademicYearID(),
+                        schoolID
                 );
 
                 // Create the student's login credentials
@@ -63,32 +64,32 @@ public class StudentManagementService {
 
                 // Create the student record
                 int studentID = createStudent(
-                    connection,
-                    request.getFirstName(),
-                    request.getLastName(),
-                    email,
-                    dateOfBirth,
-                    schoolID,
-                    credentialsID
+                        connection,
+                        request.getFirstName(),
+                        request.getLastName(),
+                        email,
+                        dateOfBirth,
+                        schoolID,
+                        credentialsID
                 );
 
                 // Enroll the student in the selected academic year
                 int studentAcademicYearID = createStudentAcademicYear(
-                    connection,
-                    studentID,
-                    request.getAcademicYearID()
+                        connection,
+                        studentID,
+                        request.getAcademicYearID()
                 );
 
                 // Add all core subjects to the student's curriculum
                 addCoreSubjectsToCurriculum(
-                    connection,
-                    studentAcademicYearID,
-                    request.getAcademicYearID(),
-                    request.getFirstName() + " " + request.getLastName(),
-                    findAcademicYearName(connection, request.getAcademicYearID())
+                        connection,
+                        studentAcademicYearID,
+                        request.getAcademicYearID(),
+                        request.getFirstName() + " " + request.getLastName(),
+                        findAcademicYearName(connection, request.getAcademicYearID())
                 );
 
-                // Save all database changes
+                // Save all database changes permanently
                 connection.commit();
 
                 // Return the new student's ID
@@ -106,7 +107,7 @@ public class StudentManagementService {
                 throw new SQLException("Student account creation failed", e);
 
             } finally {
-                // Restore the automaitc committing
+                // Restore automatic committing
                 connection.setAutoCommit(true);
             }
         }
@@ -125,26 +126,26 @@ public class StudentManagementService {
             throw new IllegalArgumentException("Enter the student's first name");
         }
 
-        // The last name also cannot be empty
+        // The last name cannot be empty
         if (request.getLastName() == null || request.getLastName().isBlank()) {
             throw new IllegalArgumentException("Enter the student's last name");
         }
 
-        // The date of birth also also cannot be empty
-        if (request.getDateOfBirth()== null || request.getLastName().isBlank()) {
+        // The date of birth cannot be empty
+        if (request.getDateOfBirth() == null || request.getDateOfBirth().isBlank()) {
             throw new IllegalArgumentException("Enter the student's date of birth");
         }
 
-        // Date must follow the proper YYYY-MM-DD format
+        // The date must follow the YYYY-MM-DD format
         try {
-            LocalDate.parse(request.getDateOfBirth()); 
+            LocalDate.parse(request.getDateOfBirth());
 
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(
-                "Enter the date of birth in YYYY-MM-DD format");
+                    "Enter the date of birth in YYYY-MM-DD format");
         }
 
-        // Ensure that the academic year is valid
+        // Ensure that a valid academic year is selected
         if (request.getAcademicYearID() <= 0) {
             throw new IllegalArgumentException("Select an academic year");
         }
@@ -156,20 +157,20 @@ public class StudentManagementService {
         String sql = "SELECT SchoolID FROM Manager WHERE ManagerID = ?";
 
         try (Connection connection = MySQLConnect.getInstance().getConnection();
-            PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setInt(1, managerID);
 
             try (ResultSet result = statement.executeQuery()) {
                 if (!result.next() || result.getObject("SchoolID") == null) {
                     throw new IllegalArgumentException(
-                        "The logged-in Manager is not linked to a school");
+                            "The logged-in Manager is not linked to a school");
                 }
 
                 return result.getInt("SchoolID");
             }
         }
-    } 
+    }
 
     // Finds the email domain belonging to the Manager's school
     private String findSchoolEmailDomain(int schoolID) throws SQLException {
@@ -177,7 +178,7 @@ public class StudentManagementService {
         String sql = "SELECT EmailDomain FROM School WHERE SchoolID = ?";
 
         try (Connection connection = MySQLConnect.getInstance().getConnection();
-        PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement = connection.prepareStatement(sql)) {
 
             statement.setInt(1, schoolID);
 
@@ -190,20 +191,17 @@ public class StudentManagementService {
 
                 if (emailDomain == null || emailDomain.isBlank()) {
                     throw new IllegalArgumentException(
-                        "The school does not have an email domain configured");
+                            "The school does not have an email domain configured");
                 }
 
                 return emailDomain.trim();
             }
-
         }
     }
 
-    /** Generates a student email address using the school's email domain
-     * "John Shimmian", "delrey.com"
-     * returns the "john.shimmian@delrey.com" generated email
-     */ 
-    private String generatedStudentEmail(String firstName, String lastName, String emailDomain) {
+    // Generates a student email address using the school's email domain
+    private String generateStudentEmail(String firstName, String lastName,
+                                        String emailDomain) {
 
         // Remove spaces and convert the names to lowercase
         String cleanedFirstName = firstName.trim().toLowerCase().replaceAll("\\s+", "");
@@ -212,7 +210,7 @@ public class StudentManagementService {
         // Build the email address
         String email = cleanedFirstName + "." + cleanedLastName + "@" + emailDomain;
 
-        // Ensure it follows the valid format
+        // Ensure that the generated email has a valid format
         if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
             throw new IllegalArgumentException("The school email domain is invalid");
         }
@@ -221,13 +219,15 @@ public class StudentManagementService {
     }
 
     // Checks that the selected academic year belongs to the manager's school
-    private void ensureAcademicYearBelongsToSchool(Connection connection, int academicYearID, int schoolID) throws SQLException {
+    private void ensureAcademicYearBelongsToSchool(Connection connection,
+                                                   int academicYearID,
+                                                   int schoolID) throws SQLException {
 
         String sql = """
-        SELECT 1
-        FROM AcademicYear
-        WHERE AcademicYearID = ? AND SchoolID = ?
-        """;
+                SELECT 1
+                FROM AcademicYear
+                WHERE AcademicYearID = ? AND SchoolID = ?
+                """;
 
         try (PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, academicYearID);
@@ -236,7 +236,7 @@ public class StudentManagementService {
             try (ResultSet result = statement.executeQuery()) {
                 if (!result.next()) {
                     throw new IllegalArgumentException(
-                        "The selected academic year does not belong to your school");
+                            "The selected academic year does not belong to your school");
                 }
             }
         }
@@ -246,7 +246,7 @@ public class StudentManagementService {
     private int createStudentCredentials(Connection connection, String passwordHash)
             throws SQLException {
 
-            String sql = """
+        String sql = """
                 INSERT INTO Credentials
                 (PasswordHash, Role, MustChangePassword, Status)
                 VALUES (?, 'Student', TRUE, 'Active')
@@ -298,9 +298,10 @@ public class StudentManagementService {
                 return keys.getInt(1);
             }
         }
-        
-        // Enrolls the student in the selected academic year
-        private int createStudentAcademicYear(Connection connection, int studentID,
+    }
+
+    // Enrolls the student in the selected academic year
+    private int createStudentAcademicYear(Connection connection, int studentID,
                                           int academicYearID) throws SQLException {
 
         String sql = """
@@ -326,8 +327,8 @@ public class StudentManagementService {
         }
     }
 
-    // Adds every core subect of the academic year to the student's curriculum
-     private void addCoreSubjectsToCurriculum(Connection connection,
+    // Adds every core subject of the academic year to the student's curriculum
+    private void addCoreSubjectsToCurriculum(Connection connection,
                                              int studentAcademicYearID,
                                              int academicYearID,
                                              String studentName,
@@ -373,5 +374,4 @@ public class StudentManagementService {
             }
         }
     }
-} 
-
+}
