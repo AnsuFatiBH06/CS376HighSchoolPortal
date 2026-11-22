@@ -20,10 +20,20 @@ public class StudentManagementService {
     public int createStudentAndEnroll(int managerID, StudentEnrollmentRequest request)
             throws SQLException {
 
-        // Ensure that the manager entered valid details
-        validateRequest(request);
+        // Validate the student details entered by the Manager
+        String validationError = validateStudentEnrollmentDetails(
+                request.getFirstName(),
+                request.getLastName(),
+                request.getDateOfBirth(),
+                request.getAcademicYearID()
+        );
 
-        // Find the logged-in manager's school
+        // Stop the process if the Manager entered invalid details
+        if (validationError != null) {
+            throw new IllegalArgumentException(validationError);
+        }
+
+        // Find the logged-in Manager's school
         int schoolID = findManagerSchoolID(managerID);
 
         // Find the school's email domain
@@ -39,7 +49,7 @@ public class StudentManagementService {
         // Use the student's date of birth as the temporary password
         String temporaryPassword = request.getDateOfBirth();
 
-        // Hash the password before storing it
+        // Hash the temporary password before storing it
         String passwordHash = BCrypt.withDefaults()
                 .hashToString(12, temporaryPassword.toCharArray());
 
@@ -52,7 +62,7 @@ public class StudentManagementService {
             connection.setAutoCommit(false);
 
             try {
-                // Make sure the selected academic year belongs to the manager's school
+                // Make sure the selected academic year belongs to the Manager's school
                 ensureAcademicYearBelongsToSchool(
                         connection,
                         request.getAcademicYearID(),
@@ -113,45 +123,57 @@ public class StudentManagementService {
         }
     }
 
-    // Validates the student details inputted by the manager
-    private void validateRequest(StudentEnrollmentRequest request) {
-
-        // The request itself must exist
-        if (request == null) {
-            throw new IllegalArgumentException("Student details are required");
-        }
+    /**
+     * Validates the student details entered by a School Manager.
+     *
+     * Returns null when the details are valid.
+     * Returns an error message when the details are invalid.
+     */
+    static String validateStudentEnrollmentDetails(String firstName, String lastName,
+                                                   String dateOfBirth, int academicYearID) {
 
         // The first name cannot be empty
-        if (request.getFirstName() == null || request.getFirstName().isBlank()) {
-            throw new IllegalArgumentException("Enter the student's first name");
+        if (firstName == null || firstName.isBlank()) {
+            return "Enter the student's first name";
+        }
+
+        // The first name must contain only letters, spaces, hyphens and apostrophes
+        if (!firstName.matches("[A-Za-zÀ-ÖØ-öø-ÿ' -]+")) {
+            return "First name contains invalid characters";
         }
 
         // The last name cannot be empty
-        if (request.getLastName() == null || request.getLastName().isBlank()) {
-            throw new IllegalArgumentException("Enter the student's last name");
+        if (lastName == null || lastName.isBlank()) {
+            return "Enter the student's last name";
+        }
+
+        // The last name must contain only letters, spaces, hyphens and apostrophes
+        if (!lastName.matches("[A-Za-zÀ-ÖØ-öø-ÿ' -]+")) {
+            return "Last name contains invalid characters";
         }
 
         // The date of birth cannot be empty
-        if (request.getDateOfBirth() == null || request.getDateOfBirth().isBlank()) {
-            throw new IllegalArgumentException("Enter the student's date of birth");
+        if (dateOfBirth == null || dateOfBirth.isBlank()) {
+            return "Enter the student's date of birth";
         }
 
-        // The date must follow the YYYY-MM-DD format
+        // The date must use the YYYY-MM-DD format
         try {
-            LocalDate.parse(request.getDateOfBirth());
-
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException(
-                    "Enter the date of birth in YYYY-MM-DD format");
+            LocalDate.parse(dateOfBirth);
+        } catch (DateTimeParseException exception) {
+            return "Enter the date of birth in YYYY-MM-DD format";
         }
 
-        // Ensure that a valid academic year is selected
-        if (request.getAcademicYearID() <= 0) {
-            throw new IllegalArgumentException("Select an academic year");
+        // A valid academic year must be selected
+        if (academicYearID <= 0) {
+            return "Select an academic year";
         }
+
+        // The details are valid
+        return null;
     }
 
-    // Finds the school ID linked to the logged-in manager
+    // Finds the school ID linked to the logged-in Manager
     private int findManagerSchoolID(int managerID) throws SQLException {
 
         String sql = "SELECT SchoolID FROM Manager WHERE ManagerID = ?";
@@ -218,7 +240,7 @@ public class StudentManagementService {
         return email;
     }
 
-    // Checks that the selected academic year belongs to the manager's school
+    // Checks that the selected academic year belongs to the Manager's school
     private void ensureAcademicYearBelongsToSchool(Connection connection,
                                                    int academicYearID,
                                                    int schoolID) throws SQLException {
