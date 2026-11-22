@@ -2,6 +2,7 @@ package com.highschoolportal.model;
 
 import java.time.LocalDateTime;
 
+// UNTESTED
 // Stores the information displayed to a student when viewing weekly teaching materials for a subject
 public class StudentTeachingMaterial {
 
