@@ -1,9 +1,9 @@
 package com.highschoolportal.services;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 class StudentManagementServiceTest {
 
@@ -111,5 +111,16 @@ class StudentManagementServiceTest {
                 null,
                 "Passed!"
         ).contains("Certificate status contains invalid characters"));
+    }
+
+    @Test
+    void rejectsInvalidManagerIDForStudentList() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new StudentManagementService().getAllStudents(0)
+        );
+
+        assertTrue(exception.getMessage().contains("Manager"));
     }
 }
