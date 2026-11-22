@@ -2,6 +2,7 @@ package com.highschoolportal.services;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.highschoolportal.database.MySQLConnect;
+import com.highschoolportal.model.StudentTeachingMaterial;
 import com.highschoolportal.model.SubjectStudent;
 
 public class TeachingService {
@@ -189,5 +191,68 @@ public class TeachingService {
         }
     }
 
+    // Returns weekly teaching materials for a subject that a student is enrolled in
+    public List<StudentTeachingMaterial> getStudentTeachingMaterials(
+        int studentID, int subjectAcademicYearID) throws SQLException {
+
+        // A valid Student ID is required
+        if (studentID <= 0) {
+            throw new IllegalArgumentException("A logged-in Student is required.");
+        }
+
+        // A valid subject offering must be selected
+        if (subjectAcademicYearID <= 0) {
+            throw new IllegalArgumentException("Select a subject.");
+        }
+
+        // Make sure the student is enrolled in the selected subject
+        ensureStudentEnrolledInSubject(studentID, subjectAcademicYearID);
+
+        String sql = """
+                SELECT
+                    tm.MaterialID,
+                    tm.WeekNumber,
+                    s.Name AS SubjectName,
+                    CONCAT(t.FName, ' ', t.LName) AS TeacherName,
+                    tm.FilePath,
+                    tm.UploadDate
+                FROM TeachingMaterial tm
+                JOIN SubjectAcademicYear say
+                    ON say.SubjectAcademicYearID = tm.SubjectAcademicYearID
+                JOIN Subject s
+                    ON s.SubjectID = say.SubjectID
+                JOIN Teacher t
+                    ON t.TeacherID = tm.TeacherID
+                WHERE tm.SubjectAcademicYearID = ?
+                ORDER BY tm.WeekNumber ASC
+                """;
+
+                List<StudentTeachingMaterial> materials = new ArrayList<>();
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, subjectAcademicYearID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    Timestamp uploadDate = result.getTimestamp("UploadDate");
+
+                    materials.add(new StudentTeachingMaterial(
+                            result.getInt("MaterialID"),
+                            result.getInt("WeekNumber"),
+                            result.getString("SubjectName"),
+                            result.getString("TeacherName"),
+                            result.getString("FilePath"),
+                            uploadDate == null ? null : uploadDate.toLocalDateTime()
+                    ));
+                }
+            }
+        }
+
+        return materials;
+    }
 }
+
+
 
