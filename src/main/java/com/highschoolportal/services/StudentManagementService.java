@@ -8,6 +8,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.highschoolportal.database.MySQLConnect;
 import com.highschoolportal.model.StudentEnrollmentRequest;
@@ -395,5 +397,94 @@ public class StudentManagementService {
                 return result.getString("Name");
             }
         }
+    }
+
+    // Manager can filter students through subject code and/or certificate status
+    public List<StudentSummary> filterStudents(int managerID, String subjectCode,
+                                               String certificateStatus)
+            throws SQLException {
+
+        // Find the Manager's school so that only their own students are shown
+        int schoolID = findManagerSchoolID(managerID);
+
+        // Remove extra spaces from the filters
+        String cleanedSubjectCode = subjectCode == null ? null : subjectCode.trim();
+        String cleanedCertificateStatus = certificateStatus == null
+                ? null
+                : certificateStatus.trim();
+
+        // Build the SQL query
+        StringBuilder sql = new StringBuilder("""
+                SELECT DISTINCT
+                    s.StudentID,
+                    CONCAT(s.FName, ' ', s.LName) AS StudentName,
+                    s.Email,
+                    ay.Name AS AcademicYearName,
+                    say.CertificateStatus
+                FROM Student s
+                JOIN StudentAcademicYear say ON say.StudentID = s.StudentID
+                JOIN AcademicYear ay ON ay.AcademicYearID = say.AcademicYearID
+                WHERE s.SchoolID = ?
+                """);
+
+        // Add the subject code filter if the Manager entered one
+        if (cleanedSubjectCode != null && !cleanedSubjectCode.isBlank()) {
+            sql.append("""
+                AND EXISTS (
+                    SELECT 1
+                    FROM Details d
+                    JOIN SubjectAcademicYear saySubject
+                        ON saySubject.SubjectAcademicYearID = d.SubjectAcademicYearID
+                    JOIN Subject subject
+                        ON subject.SubjectID = saySubject.SubjectID
+                    WHERE d.StudentAcademicYearID = say.StudentAcademicYearID
+                      AND subject.Code = ?
+                )
+                """);
+        }
+
+        // Add the certificate status filter if the Manager selected one
+        if (cleanedCertificateStatus != null && !cleanedCertificateStatus.isBlank()) {
+            sql.append(" AND say.CertificateStatus = ? ");
+        }
+
+        // Display students in a consistent order
+        sql.append(" ORDER BY s.StudentID ASC ");
+
+        List<StudentSummary> students = new ArrayList<>();
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+
+            int parameterIndex = 1;
+
+            // Always filter by the Manager's school
+            statement.setInt(parameterIndex++, schoolID);
+
+            // Add the subject-code parameter if it was provided
+            if (cleanedSubjectCode != null && !cleanedSubjectCode.isBlank()) {
+                statement.setString(parameterIndex++, cleanedSubjectCode);
+            }
+
+            // Add the certificate-status parameter if it was provided
+            if (cleanedCertificateStatus != null && !cleanedCertificateStatus.isBlank()) {
+                statement.setString(parameterIndex++, cleanedCertificateStatus);
+            }
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    students.add(new StudentSummary(
+                            result.getInt("StudentID"),
+                            result.getString("StudentName"),
+                            result.getString("Email"),
+                            result.getString("AcademicYearName"),
+                            result.getString("CertificateStatus")
+                    ));
+                }
+            }
+        }
+
+        // Return the filtered students; this may be empty if no students match
+        return students;
     }
 }
