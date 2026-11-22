@@ -125,7 +125,7 @@ public class TeachingService {
         ensureTeacherAssignedToSubject(teacherID, subjectAcademicYearID);
 
         // Create the uploads folder (if it doesn't already exist)
-        Path uploadFolder = Paths.geet("uploads", "teaching-materials");
+        Path uploadFolder = Paths.get("uploads", "teaching-materials");
         Files.createDirectories(uploadFolder);
 
         // Create a unique file name to prevent overwriting existing files
@@ -151,7 +151,7 @@ public class TeachingService {
                 """;
 
         try (Connection connection = MySQLConnect.getInstance().getConnection();
-            PreparedStatement statement = connection.PrepareStatement(sql)) {
+            PreparedStatement statement = connection.prepareStatement(sql)) {
 
                 statement.setInt(1, teacherID);
                 statement.setInt(2, subjectAcademicYearID);
