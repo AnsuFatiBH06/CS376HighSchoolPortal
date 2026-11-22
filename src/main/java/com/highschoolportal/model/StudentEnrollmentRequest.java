@@ -21,7 +21,7 @@ public class StudentEnrollmentRequest {
         return firstName;
     }
 
-    public  String getLastName() {
+    public String getLastName() {
         return lastName;
     }
 

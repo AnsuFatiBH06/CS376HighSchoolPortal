@@ -130,6 +130,11 @@ public class StudentManagementService {
     // Returns all students enrolled in the logged in manager's school
     public List<StudentSummary> getAllStudents(int managerID) throws SQLException {
 
+        // A valid manager ID is required before connecting to the database
+        if (managerID <= 0) {
+            throw new IllegalArgumentException("A logged-in School Manager is required");
+        }
+        
         // Find the Manager's school so that only their own students are displayed
         int schoolID = findManagerSchoolID(managerID);
 
@@ -576,7 +581,7 @@ public class StudentManagementService {
                     CONCAT(s.FName, ' ', s.LName) AS StudentName,
                     s.Email,
                     ay.Name AS AcademicYearName,
-                    COUNT(d.DetailID) AS OptionalSubjectsSelected,
+                    COUNT(CASE WHEN saySubject.IsCore = FALSE THEN 1 END) AS OptionalSubjectsSelected,
                     ay.MinOptionalSubjects AS MinimumOptionalSubjects
                 FROM Student s
                 JOIN StudentAcademicYear say ON say.StudentID = s.StudentID
@@ -689,7 +694,7 @@ public class StudentManagementService {
 
         // a logged in manager is required
         if (managerID <= 0) {
-            return "A logged-in school manager is required";
+            return "A logged-in School Manager is required";
         }
 
         // A valid student must be selected

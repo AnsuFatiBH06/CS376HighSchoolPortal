@@ -135,4 +135,54 @@ class StudentManagementServiceTest {
 
         assertTrue(exception.getMessage().contains("Manager"));
     }
+
+    @Test
+    void acceptsValidNotification() {
+
+        assertNull(StudentManagementService.validateNotification(
+                1,
+                1,
+                "Please select your missing optional subjects."
+        ));
+    }
+
+    @Test
+    void rejectsInvalidManagerForNotification() {
+
+        assertTrue(StudentManagementService.validateNotification(
+                0,
+                1,
+                "Please select your missing optional subjects."
+        ).contains("School Manager"));
+    }
+
+    @Test
+    void rejectsInvalidStudentForNotification() {
+
+        assertTrue(StudentManagementService.validateNotification(
+                1,
+                0,
+                "Please select your missing optional subjects."
+        ).contains("student"));
+    }
+
+    @Test
+    void rejectsBlankNotificationMessage() {
+
+        assertTrue(StudentManagementService.validateNotification(
+                1,
+                1,
+                " "
+        ).contains("notification message"));
+    }
+
+    @Test
+    void rejectsLongNotificationMessage() {
+
+        assertTrue(StudentManagementService.validateNotification(
+                1,
+                1,
+                "a".repeat(501)
+        ).contains("500 characters or fewer"));
+    }
 }
