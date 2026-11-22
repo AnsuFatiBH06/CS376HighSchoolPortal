@@ -30,7 +30,7 @@ public class StudentManagementService {
         String emailDomain = findSchoolEmailDomain(schoolID);
 
         // Generate the student's school email
-        String email = generateStudentEmail(
+        String email = generatedStudentEmail(
             request.getFirstName(),
             request.getLastName(),
             emailDomain
@@ -298,6 +298,7 @@ public class StudentManagementService {
                 return keys.getInt(1);
             }
         }
+    }
         
         // Enrolls the student in the selected academic year
         private int createStudentAcademicYear(Connection connection, int studentID,
