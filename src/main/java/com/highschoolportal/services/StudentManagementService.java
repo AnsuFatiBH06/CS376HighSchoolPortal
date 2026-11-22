@@ -683,4 +683,31 @@ public class StudentManagementService {
 
         return notifications;
     }
+
+    // Validates the notification details entered by a school manager
+    static String validateNotification(int managerID, int studentID, String message) {
+
+        // a logged in manager is required
+        if (managerID <= 0) {
+            return "A logged-in school manager is required";
+        }
+
+        // A valid student must be selected
+        if (studentID <= 0) {
+            return "Select a student to notify";
+        }
+
+        // The notification message cannot be empty
+        if (message == null || message.isBlank()) {
+            return "Enter a notification message";
+        }
+
+        // The notification message cannot be too long
+        if (message.trim().length() > 500) {
+            return "The notification message must be 500 characters or fewer";
+        }
+
+        // Signifies that the notification is valid
+        return null;
+    }
 }
