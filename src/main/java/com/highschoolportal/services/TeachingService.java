@@ -162,4 +162,32 @@ public class TeachingService {
 
             return "Teaching material uploaded successfully for week " + weekNumber + "!";
     }
+
+    // Checks that a teacher is assigned to the selected subject
+    private void ensureTeacherAssignedToSubject(int teacherID, int subjectAcademicYearID)
+        throws SQLException {
+
+            String sql = """
+            SELECT 1
+            FROM SubjectAcademicYear
+            WHERE SubjectAcademicYearID = ?
+            AND TeacherID = ?
+            """;
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, subjectAcademicYearID);
+            statement.setInt(2, teacherID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new IllegalArgumentException(
+                            "You are not assigned to the selected subject");
+                }
+            }
+        }
+    }
+
 }
+
