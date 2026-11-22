@@ -2,7 +2,6 @@ package com.highschoolportal.services;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,6 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -227,7 +227,7 @@ public class TeachingService {
                 ORDER BY tm.WeekNumber ASC
                 """;
 
-                List<StudentTeachingMaterial> materials = new ArrayList<>();
+        List<StudentTeachingMaterial> materials = new ArrayList<>();
 
         try (Connection connection = MySQLConnect.getInstance().getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -251,6 +251,88 @@ public class TeachingService {
         }
 
         return materials;
+    }
+
+    // Returns the pdf file for a teaching material
+    public File downloadTeachingMaterial(int studentID, int materialID)
+            throws SQLException, IOException {
+
+        // A valid Student ID is required
+        if (studentID <= 0) {
+            throw new IllegalArgumentException("A logged-in Student is required.");
+        }
+
+        // A valid teaching material must be selected
+        if (materialID <= 0) {
+            throw new IllegalArgumentException("Select a teaching material.");
+        }
+
+        String sql = """
+                SELECT tm.FilePath, tm.SubjectAcademicYearID
+                FROM TeachingMaterial tm
+                WHERE tm.MaterialID = ?
+                """;
+
+        String filePath;
+        int subjectAcademicYearID;
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, materialID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new IllegalArgumentException(
+                            "The selected teaching material was not found.");
+                }
+
+                filePath = result.getString("FilePath");
+                subjectAcademicYearID = result.getInt("SubjectAcademicYearID");
+            }
+        }
+
+        // Make sure the student is enrolled in the subject
+        ensureStudentEnrolledInSubject(studentID, subjectAcademicYearID);
+
+        File pdfFile = new File(filePath);
+
+        // Make sure the stored pdf file still exists
+        if (!pdfFile.exists()) {
+            throw new IOException("The teaching material file could not be found.");
+        }
+
+        return pdfFile;
+    }
+
+    // Checks that a student is enrolled in the selected subject
+    private void ensureStudentEnrolledInSubject(int studentID,
+                                                int subjectAcademicYearID)
+            throws SQLException {
+
+        String sql = """
+                SELECT 1
+                FROM Details d
+                JOIN StudentAcademicYear say
+                    ON say.StudentAcademicYearID = d.StudentAcademicYearID
+                WHERE say.StudentID = ?
+                  AND d.SubjectAcademicYearID = ?
+                LIMIT 1
+                """;
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, studentID);
+            statement.setInt(2, subjectAcademicYearID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) {
+                    throw new IllegalArgumentException(
+                            "You are not enrolled in the selected subject.");
+                }
+            }
+        }
     }
 }
 
