@@ -123,4 +123,16 @@ class StudentManagementServiceTest {
 
         assertTrue(exception.getMessage().contains("Manager"));
     }
+
+    @Test
+    void rejectsInvalidManagerIDForIncompleteCurricula() {
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> new StudentManagementService()
+                        .getStudentsWithIncompleteCurricula(0)
+        );
+
+        assertTrue(exception.getMessage().contains("Manager"));
+    }
 }
