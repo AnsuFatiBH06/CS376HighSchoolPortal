@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.highschoolportal.database.MySQLConnect;
+import com.highschoolportal.model.IncompleteCurriculumStudent;
 import com.highschoolportal.model.StudentEnrollmentRequest;
 import com.highschoolportal.model.StudentSummary;
 
@@ -555,5 +556,73 @@ public class StudentManagementService {
 
         // Both filters are valid
         return null;
+    }
+
+    // Returns students with incomplete curricula
+    public List<IncompleteCurriculumStudent> getStudentsWithIncompleteCurricula(int managerID)
+            throws SQLException {
+
+        // A valid Manager ID is required before connecting to the database
+        if (managerID <= 0) {
+            throw new IllegalArgumentException("A logged-in School Manager is required.");
+        }
+
+        // Find the Manager's school so that only their own students are displayed
+        int schoolID = findManagerSchoolID(managerID);
+
+        String sql = """
+                SELECT
+                    s.StudentID,
+                    CONCAT(s.FName, ' ', s.LName) AS StudentName,
+                    s.Email,
+                    ay.Name AS AcademicYearName,
+                    COUNT(d.DetailID) AS OptionalSubjectsSelected,
+                    ay.MinOptionalSubjects AS MinimumOptionalSubjects
+                FROM Student s
+                JOIN StudentAcademicYear say ON say.StudentID = s.StudentID
+                JOIN AcademicYear ay ON ay.AcademicYearID = say.AcademicYearID
+                LEFT JOIN Details d
+                    ON d.StudentAcademicYearID = say.StudentAcademicYearID
+                LEFT JOIN SubjectAcademicYear saySubject
+                    ON saySubject.SubjectAcademicYearID = d.SubjectAcademicYearID
+                    AND saySubject.IsCore = FALSE
+                WHERE s.SchoolID = ?
+                  AND ay.MinOptionalSubjects > 0
+                GROUP BY
+                    s.StudentID,
+                    s.FName,
+                    s.LName,
+                    s.Email,
+                    ay.Name,
+                    ay.MinOptionalSubjects,
+                    say.StudentAcademicYearID
+                HAVING COUNT(CASE WHEN saySubject.IsCore = FALSE THEN 1 END)
+                    < ay.MinOptionalSubjects
+                ORDER BY s.StudentID ASC
+                """;
+
+        List<IncompleteCurriculumStudent> students = new ArrayList<>();
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, schoolID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    students.add(new IncompleteCurriculumStudent(
+                            result.getInt("StudentID"),
+                            result.getString("StudentName"),
+                            result.getString("Email"),
+                            result.getString("AcademicYearName"),
+                            result.getInt("OptionalSubjectsSelected"),
+                            result.getInt("MinimumOptionalSubjects")
+                    ));
+                }
+            }
+        }
+
+        // Return only students who still need to select optional subjects
+        return students;
     }
 }
