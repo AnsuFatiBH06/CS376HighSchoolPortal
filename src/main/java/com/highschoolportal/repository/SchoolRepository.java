@@ -137,8 +137,7 @@ public class SchoolRepository {
     public boolean rejectSchool(int schoolID) throws SQLException {
         String sql =
                 """
-                UPDATE School
-                SET Status = 'Rejected'
+                DELETE FROM School
                 WHERE SchoolID = ?
                 """;
 

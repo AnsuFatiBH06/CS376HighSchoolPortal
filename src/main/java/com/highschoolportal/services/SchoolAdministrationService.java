@@ -22,6 +22,31 @@ public class SchoolAdministrationService {
     }
 
     public boolean rejectSchool(int schoolID) throws SQLException {
-        return repository.rejectSchool(schoolID);
+        boolean rejectionSuccessful = repository.rejectSchool(schoolID);
+        if (rejectionSuccessful) {
+            // String email = sendEmail(null, null, null)
+            return true;
+        }
+        return false;
+    }
+
+    private String sendEmail(String reason1, String reason2, String reason3) {
+        String draft = "Dear Manager,\nWe are sorry to inform you that your school signup has been rejected.\n"
+                        + "Our reasons for the rejection are as follows:\n";
+        
+        if (reason1 != null) {
+            draft += reason1 + "\n";
+        }
+
+        if (reason2 != null) {
+            draft += reason2 + "\n";
+        }
+
+        if (reason3 != null) {
+            draft += reason3 + "\n";
+        }
+
+        draft += "Thank you for your understanding, and best of luck moving forward.";
+        return draft;
     }
 }
