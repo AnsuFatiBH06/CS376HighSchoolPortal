@@ -4,6 +4,7 @@ import java.awt.*;
 import javax.swing.table.DefaultTableModel;
 
 import com.highschoolportal.app.App;
+import com.highschoolportal.model.SystemAdmin;
 import com.highschoolportal.services.SchoolAdministrationService;
 
 public class PendingSchoolsUI extends JPanel {
@@ -51,7 +52,12 @@ public class PendingSchoolsUI extends JPanel {
                                 "Address"
                         },
                         0
-                );
+                ) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
 
         schoolsTable = new JTable(tableModel);
 

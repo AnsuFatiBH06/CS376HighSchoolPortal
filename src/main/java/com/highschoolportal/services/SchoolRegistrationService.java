@@ -1,5 +1,6 @@
 package com.highschoolportal.services;
 import com.highschoolportal.model.School;
+import com.highschoolportal.model.Manager;
 import com.highschoolportal.repository.SchoolRepository;
 
 import java.sql.SQLException;
@@ -76,9 +77,9 @@ public class SchoolRegistrationService {
         return null;
     }
 
-    public boolean registerSchool(School school) {
+    public boolean registerSchool(School school, Manager manager) {
         try {
-            return this.schoolRepository.insertPendingSchool(school);
+            return this.schoolRepository.insertPendingSchool(school, manager);
         } catch (SQLException e) {
             return false;
         }
