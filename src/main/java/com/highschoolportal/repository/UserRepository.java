@@ -12,6 +12,7 @@ import com.highschoolportal.model.Credentials;
 import com.highschoolportal.model.Manager;
 import com.highschoolportal.model.SystemAdmin;
 import com.highschoolportal.model.User;
+import com.highschoolportal.model.Manager.SuperManagerStatus;
 
 public class UserRepository {
 
@@ -35,7 +36,7 @@ public class UserRepository {
             case Manager -> """
                 SELECT ManagerID AS UserID,
                        FName, LName, Email,
-                       CredentialsID, SchoolID
+                       CredentialsID, SchoolID, SuperManagerStatus
                 FROM Manager
                 WHERE CredentialsID = ?
                 """;
@@ -86,16 +87,20 @@ public class UserRepository {
                     case Manager -> {
                         Integer schoolId = (Integer)
                             result.getObject("SchoolID");
+                        
+                        String superManagerStatus =
+                            result.getString("SuperManagerStatus");
 
                         if (schoolId == null) {
                             user = new Manager(
                                 userId, firstName, lastName,
-                                email, accountId, null
+                                email, accountId, SuperManagerStatus.valueOf(superManagerStatus.toUpperCase())
                             );
                         } else {
                             user = new Manager(
                                 userId, firstName, lastName,
-                                email, accountId, null, schoolId
+                                email, accountId, SuperManagerStatus.valueOf(superManagerStatus.toUpperCase()),
+                                schoolId
                             );
                         }
                     }
