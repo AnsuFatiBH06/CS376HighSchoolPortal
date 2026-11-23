@@ -24,26 +24,20 @@ public class SchoolAdministrationService {
     public boolean rejectSchool(int schoolID) throws SQLException {
         boolean rejectionSuccessful = repository.rejectSchool(schoolID);
         if (rejectionSuccessful) {
-            // String email = sendEmail(null, null, null)
             return true;
         }
         return false;
     }
 
-    private String sendEmail(String reason1, String reason2, String reason3) {
+    // should be used in future releases to actually send the email
+    public String generateEmail(String[] reasons) {
         String draft = "Dear Manager,\nWe are sorry to inform you that your school signup has been rejected.\n"
                         + "Our reasons for the rejection are as follows:\n";
         
-        if (reason1 != null) {
-            draft += reason1 + "\n";
-        }
-
-        if (reason2 != null) {
-            draft += reason2 + "\n";
-        }
-
-        if (reason3 != null) {
-            draft += reason3 + "\n";
+        for (int i = 0; i < reasons.length; i++) {
+            if (!(reasons[i].isBlank() || reasons[i] == null)) {
+                draft += reasons[i] + "\n";
+            }
         }
 
         draft += "Thank you for your understanding, and best of luck moving forward.";

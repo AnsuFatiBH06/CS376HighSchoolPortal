@@ -102,27 +102,33 @@ public class PendingSchoolsUI extends JPanel {
         try {
             switch(choice) {
                 case 0 -> {
-                    int confirmChoice = JOptionPane.showConfirmDialog(this, "Are you sure of approving this school?");
-                    if (confirmChoice == 0) {
+                    if (showConfirmationPrompt("Are you sure of approving this school?", "Confirm School Approval") == JOptionPane.YES_OPTION) {
                         if (service.approveSchool(schoolID)) {
                             JOptionPane.showMessageDialog(this, "School has been approved.");
+                            // app.goBack();
                         }
                     }
                 }
 
                 case 1 -> {
-                    int confirmChoice = JOptionPane.showConfirmDialog(this, "Are you sure of rejecting this school?");
-                    if (confirmChoice == 0) {
+                    if (showConfirmationPrompt("Are you sure of rejecting this school?", "Confirm School Rejection") == JOptionPane.YES_OPTION) {
                         if (service.rejectSchool(schoolID)) {
                             // need to add the code for selecting justification + emailing to manager
+                            String[] rejectionReasons = fillRejectionMessages();
+                            if (rejectionReasons == null) {
+                                return;
+                            } else {
+                                service.generateEmail(rejectionReasons);
+                                // should be used in future releases to actually send the email
+                            }
                             JOptionPane.showMessageDialog(this, "School has been rejected.");
+                            // app.goBack();
                         }
                     }
                 }
             }
-
             refreshSchools();
-        } catch(Exception exception) {
+        } catch (Exception exception) {
             JOptionPane.showMessageDialog(this, exception.getMessage());
         }
     }
@@ -148,5 +154,60 @@ public class PendingSchoolsUI extends JPanel {
                     exception.getMessage()
             );
         }
+    }
+
+    private int showConfirmationPrompt(String message, String title) {
+            return JOptionPane.showConfirmDialog(
+                this,
+                message,
+                title,
+                JOptionPane.YES_NO_OPTION
+        );
+    }
+
+    private String[] fillRejectionMessages() {
+        JTextField reason1 = new JTextField(25);
+        JTextField reason2 = new JTextField(25);
+        JTextField reason3 = new JTextField(25);
+
+        JPanel panel = new JPanel();
+
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
+        panel.add(new JLabel("Provide at least one rejection reason:"));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(new JLabel("Reason 1"));
+        panel.add(reason1);
+
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(new JLabel("Reason 2"));
+        panel.add(reason2);
+        panel.add(Box.createVerticalStrut(5));
+
+        panel.add(new JLabel("Reason 3"));
+        panel.add(reason3);
+
+        int result = JOptionPane.showConfirmDialog(
+                        this,
+                        panel,
+                        "Reject School",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.WARNING_MESSAGE
+                );
+
+        if (result == JOptionPane.OK_OPTION) {
+            if ((reason1.getText().isBlank() || reason1.getText() == null) &&
+                (reason2.getText().isBlank() || reason2.getText() == null) &&
+                (reason3.getText().isBlank() || reason3.getText() == null)
+            ) {
+                JOptionPane.showMessageDialog(this, "You need to input at least 1 rejection reason.");
+                return null;
+            }
+
+            String[] reasons = {reason1.getText(), reason2.getText(), reason3.getText()};
+
+            return reasons;
+        }
+        return null;
     }
 }
