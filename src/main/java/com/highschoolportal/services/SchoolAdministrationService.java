@@ -22,11 +22,7 @@ public class SchoolAdministrationService {
     }
 
     public boolean rejectSchool(int schoolID) throws SQLException {
-        boolean rejectionSuccessful = repository.rejectSchool(schoolID);
-        if (rejectionSuccessful) {
-            return true;
-        }
-        return false;
+        return repository.rejectSchool(schoolID);
     }
 
     // should be used in future releases to actually send the email

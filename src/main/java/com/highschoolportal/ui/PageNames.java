@@ -13,11 +13,13 @@ public class PageNames {
 
     // Admin Pages
     public static final String ADMIN_HOMEPAGE = "ADMIN_HOMEPAGE";
+    public static final String ADMIN_PENDING_SUPER_MANAGERS = "ADMIN_PENDING_SUPER_MANAGERS";
+    public static final String ADMIN_APPROVED_SUPER_MANAGERS = "ADMIN_APPROVED_SUPER_MANAGERS";
     public static final String ADMIN_PENDING_SCHOOLS = "ADMIN_PENDING_SCHOOLS";
     public static final String ADMIN_APPROVED_SCHOOLS = "ADMIN_APPROVED_SCHOOLS";
     public static final String ADMIN_PASSWORD_MANAGEMENT = "ADMIN_PASSWORD_MANAGEMENT";
 
-    // Password management (Sprint 2 Task Set 4)
+    // Password management
     public static final String PASSWORD_RESET_REQUEST = "PASSWORD_RESET_REQUEST";
     public static final String UPDATE_PASSWORD = "UPDATE_PASSWORD";
     public static final String MANAGER_PASSWORD_MANAGEMENT = "MANAGER_PASSWORD_MANAGEMENT";

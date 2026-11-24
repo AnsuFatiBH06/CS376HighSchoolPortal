@@ -4,6 +4,7 @@ import com.highschoolportal.model.Manager;
 import com.highschoolportal.repository.ManagerRepository;
 
 import java.sql.SQLException;
+import java.util.List;
 
 
 public class SuperManagerService {
@@ -23,5 +24,21 @@ public class SuperManagerService {
         } catch (SQLException exception) {
             return false;
         }
+    }
+
+    public List<Manager> getApprovedSuperManagers() throws SQLException {
+        return this.managerRepository.findApprovedSuperManagers();
+    }
+
+    public List<Manager> getPendingSuperManagers() throws SQLException {
+        return this.managerRepository.findPendingSuperManagers();
+    }
+
+    public boolean approveSuperManager(int managerID) throws SQLException {
+        return this.managerRepository.approveSuperManager(managerID);
+    }
+
+    public boolean rejectSuperManager(int managerID) throws SQLException {
+        return this.managerRepository.rejectSuperManager(managerID);
     }
 }
