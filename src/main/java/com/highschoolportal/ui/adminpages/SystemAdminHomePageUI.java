@@ -16,6 +16,8 @@ public class SystemAdminHomePageUI extends JPanel {
 
     private final App app;
 
+    private JButton pendingSuperManagersViewButton;
+    private JButton existingSuperManagersViewButton;
     private JButton pendingSchoolsViewButton;
     private JButton existingSchoolsViewButton;
     private JButton viewPasswordRequestsButton;
@@ -37,11 +39,15 @@ public class SystemAdminHomePageUI extends JPanel {
         add(up, BorderLayout.NORTH);
 
         JPanel pages = new JPanel(new FlowLayout());
+        pendingSuperManagersViewButton = new JButton("Pending Super Managers");
+        existingSuperManagersViewButton = new JButton("Approved Super Managers");
         pendingSchoolsViewButton = new JButton("Pending Schools");
         existingSchoolsViewButton = new JButton("Existing Schools");
         viewPasswordRequestsButton = new JButton("Password Reset Requests");
         logoutButton = new JButton("Logout");
         logoutButton.setBackground(Color.RED);
+        pages.add(pendingSuperManagersViewButton);
+        pages.add(existingSuperManagersViewButton);
         pages.add(pendingSchoolsViewButton);
         pages.add(existingSchoolsViewButton);
         pages.add(logoutButton);
@@ -52,6 +58,14 @@ public class SystemAdminHomePageUI extends JPanel {
         // add(existingSchoolsViewButton);
         // add(viewPasswordRequestsButton);
         // add(logoutButton);
+        pendingSuperManagersViewButton.addActionListener(event
+                -> this.app.showPage(PageNames.ADMIN_PENDING_SUPER_MANAGERS)  
+        );
+
+        existingSuperManagersViewButton.addActionListener(event
+                -> this.app.showPage(PageNames.ADMIN_APPROVED_SUPER_MANAGERS)  
+        );
+
         pendingSchoolsViewButton.addActionListener(event
                 -> this.app.showPage(PageNames.ADMIN_PENDING_SCHOOLS)
         );

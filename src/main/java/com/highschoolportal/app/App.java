@@ -13,9 +13,7 @@ import com.highschoolportal.model.User;
 import com.highschoolportal.services.AuthenticationService;
 import com.highschoolportal.services.RememberMeCoordinator;
 import com.highschoolportal.ui.PageNames;
-import com.highschoolportal.ui.adminpages.ApprovedSchoolsUI;
-import com.highschoolportal.ui.adminpages.PendingSchoolsUI;
-import com.highschoolportal.ui.adminpages.SystemAdminHomePageUI;
+import com.highschoolportal.ui.adminpages.*;
 import com.highschoolportal.ui.managerpages.BusinessRuleUI;
 import com.highschoolportal.ui.managerpages.ManagerHomePageUI;
 import com.highschoolportal.ui.managerpages.ManagerPasswordManagementUI;
@@ -140,6 +138,8 @@ public class App {
         innerContainer.add(new LoginUI(this), PageNames.LOGIN);
         // Admin Pages
         innerContainer.add(new SystemAdminHomePageUI(this), PageNames.ADMIN_HOMEPAGE);
+        innerContainer.add(new PendingSuperManagersUI(this), PageNames.ADMIN_PENDING_SUPER_MANAGERS);
+        innerContainer.add(new ApprovedSuperManagersUI(this), PageNames.ADMIN_APPROVED_SUPER_MANAGERS);
         innerContainer.add(new ApprovedSchoolsUI(this), PageNames.ADMIN_APPROVED_SCHOOLS);
         innerContainer.add(new PendingSchoolsUI(this), PageNames.ADMIN_PENDING_SCHOOLS);
 

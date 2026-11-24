@@ -40,7 +40,7 @@ public class PendingSchoolsUI extends JPanel {
         );
 
         actionButton.addActionListener(event -> 
-                handleAction()
+            handleAction()
         );
 
         tableModel = new DefaultTableModel(
