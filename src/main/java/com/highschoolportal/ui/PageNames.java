@@ -30,6 +30,7 @@ public class PageNames {
 
     // Teacher Pages
     public static final String TEACHER_HOMEPAGE = "TEACHER_HOMEPAGE";
+    public static final String TEACHER_SUBJECT_STUDENTS = "TEACHER_SUBJECT_STUDENTS";
 
     // Student Pages
     public static final String STUDENT_HOMEPAGE = "STUDENT_HOMEPAGE";
