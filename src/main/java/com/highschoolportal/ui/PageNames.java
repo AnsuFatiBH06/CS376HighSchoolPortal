@@ -35,4 +35,5 @@ public class PageNames {
 
     // Student Pages
     public static final String STUDENT_HOMEPAGE = "STUDENT_HOMEPAGE";
+    public static final String STUDENT_TEACHING_MATERIALS = "STUDENT_TEACHING_MATERIALS";
 }
