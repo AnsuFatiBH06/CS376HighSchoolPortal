@@ -50,4 +50,21 @@ public class AttendanceService {
         if (studentID <= 0) throw new IllegalArgumentException("A logged-in student is required");
         return repository.listHistory(studentID);
     }
+
+    public enum ReviewDecision { Approved, Rejected }
+
+    public List<AttendanceRepository.PendingAttendance> listPendingForTeacher(int teacherID)
+            throws SQLException {
+        if (teacherID <= 0) throw new IllegalArgumentException("A logged-in teacher is required");
+        return repository.listPendingForTeacher(teacherID);
+    }
+
+    public void reviewAttendance(int teacherID, int attendanceID, ReviewDecision decision)
+            throws SQLException {
+        if (teacherID <= 0 || attendanceID <= 0) {
+            throw new IllegalArgumentException("A logged-in teacher and attendance record are required");
+        }
+        if (decision == null) throw new IllegalArgumentException("Choose an approval decision");
+        repository.reviewPendingAttendance(teacherID, attendanceID, decision.name());
+    }
 }

@@ -126,4 +126,87 @@ public class AttendanceRepository {
         }
         return result;
     }
+
+    public record PendingAttendance(int attendanceID, int detailID, int studentID,
+                                    String studentName, String subjectCode, String subjectName,
+                                    String academicYear, LocalDate sessionDate, int weekNumber,
+                                    String status) {}
+
+    /** Lists only pending entries for the teacher's own assigned subject offerings. */
+    public List<PendingAttendance> listPendingForTeacher(int teacherID) throws SQLException {
+        String sql = """
+            SELECT a.AttendanceID, d.DetailID, student.StudentID,
+                   CONCAT(student.FName, ' ', student.LName) AS StudentName,
+                   subj.Code, subj.Name AS SubjectName, ay.Name AS YearName,
+                   a.SessionDate, a.WeekNumber, a.Status
+            FROM Attendance a
+            JOIN Details d ON d.DetailID = a.DetailID
+            JOIN StudentAcademicYear enrol ON enrol.StudentAcademicYearID = d.StudentAcademicYearID
+            JOIN Student student ON student.StudentID = enrol.StudentID
+            JOIN SubjectAcademicYear offering ON offering.SubjectAcademicYearID = d.SubjectAcademicYearID
+            JOIN Subject subj ON subj.SubjectID = offering.SubjectID
+            JOIN AcademicYear ay ON ay.AcademicYearID = enrol.AcademicYearID
+            JOIN Teacher teacher ON teacher.TeacherID = offering.TeacherID
+            JOIN Credentials c ON c.CredentialsID = teacher.CredentialsID
+            JOIN School school ON school.SchoolID = teacher.SchoolID
+            WHERE teacher.TeacherID = ? AND c.Role = 'Teacher' AND c.Status = 'Active'
+              AND c.MustChangePassword = 0 AND school.Status = 'Approved'
+              AND teacher.SchoolID = student.SchoolID AND teacher.SchoolID = subj.SchoolID
+              AND teacher.SchoolID = ay.SchoolID AND offering.AcademicYearID = enrol.AcademicYearID
+              AND a.ApprovalStatus = 'Pending' AND d.IsFrozen = 0
+            ORDER BY a.SessionDate DESC, subj.Code, student.LName, student.FName, a.AttendanceID
+            """;
+        List<PendingAttendance> result = new ArrayList<>();
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, teacherID);
+            try (ResultSet rows = statement.executeQuery()) {
+                while (rows.next()) {
+                    result.add(new PendingAttendance(rows.getInt("AttendanceID"),
+                            rows.getInt("DetailID"), rows.getInt("StudentID"),
+                            rows.getString("StudentName"), rows.getString("Code"),
+                            rows.getString("SubjectName"), rows.getString("YearName"),
+                            rows.getDate("SessionDate").toLocalDate(), rows.getInt("WeekNumber"),
+                            rows.getString("Status")));
+                }
+            }
+        }
+        return result;
+    }
+
+    /** Changes a pending entry only if authorization and pending status still hold. */
+    public void reviewPendingAttendance(int teacherID, int attendanceID, String decision)
+            throws SQLException {
+        if (!"Approved".equals(decision) && !"Rejected".equals(decision)) {
+            throw new IllegalArgumentException("Choose Approved or Rejected");
+        }
+        String sql = """
+            UPDATE Attendance a
+            JOIN Details d ON d.DetailID = a.DetailID
+            JOIN StudentAcademicYear enrol ON enrol.StudentAcademicYearID = d.StudentAcademicYearID
+            JOIN Student student ON student.StudentID = enrol.StudentID
+            JOIN SubjectAcademicYear offering ON offering.SubjectAcademicYearID = d.SubjectAcademicYearID
+            JOIN Subject subj ON subj.SubjectID = offering.SubjectID
+            JOIN AcademicYear ay ON ay.AcademicYearID = enrol.AcademicYearID
+            JOIN Teacher teacher ON teacher.TeacherID = offering.TeacherID
+            JOIN Credentials c ON c.CredentialsID = teacher.CredentialsID
+            JOIN School school ON school.SchoolID = teacher.SchoolID
+            SET a.ApprovalStatus = ?
+            WHERE teacher.TeacherID = ? AND c.Role = 'Teacher' AND c.Status = 'Active'
+              AND c.MustChangePassword = 0 AND school.Status = 'Approved'
+              AND teacher.SchoolID = student.SchoolID AND teacher.SchoolID = subj.SchoolID
+              AND teacher.SchoolID = ay.SchoolID AND offering.AcademicYearID = enrol.AcademicYearID
+              AND a.ApprovalStatus = 'Pending' AND d.IsFrozen = 0
+              AND a.AttendanceID = ?
+            """;
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, decision);
+            statement.setInt(2, teacherID);
+            statement.setInt(3, attendanceID);
+            if (statement.executeUpdate() != 1) {
+                throw new SQLException("Attendance is unavailable, already reviewed, or not assigned to this teacher");
+            }
+        }
+    }
 }
