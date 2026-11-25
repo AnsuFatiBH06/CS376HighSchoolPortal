@@ -46,4 +46,8 @@ public class AttendanceService {
         return repository.insertPendingAttendance(studentID, detailID,
                 sessionDate, weekNumber, status.name());
     }
+    public List<AttendanceRepository.AttendanceEntry> listHistory(int studentID) throws SQLException {
+        if (studentID <= 0) throw new IllegalArgumentException("A logged-in student is required");
+        return repository.listHistory(studentID);
+    }
 }

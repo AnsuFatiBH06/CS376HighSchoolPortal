@@ -90,4 +90,40 @@ public class AttendanceRepository {
             }
         }
     }
+    public record AttendanceEntry(String subjectCode, String subjectName, String academicYear,
+                                  LocalDate sessionDate, int weekNumber, String status,
+                                  String approvalStatus) {}
+
+    public List<AttendanceEntry> listHistory(int studentID) throws SQLException {
+        String sql = """
+            SELECT subj.Code, subj.Name AS SubjectName, ay.Name AS YearName,
+                   a.SessionDate, a.WeekNumber, a.Status, a.ApprovalStatus
+            FROM Attendance a
+            JOIN Details d ON d.DetailID = a.DetailID
+            JOIN StudentAcademicYear enrol ON enrol.StudentAcademicYearID = d.StudentAcademicYearID
+            JOIN Student student ON student.StudentID = enrol.StudentID
+            JOIN Credentials c ON c.CredentialsID = student.CredentialsID
+            JOIN SubjectAcademicYear offering ON offering.SubjectAcademicYearID = d.SubjectAcademicYearID
+            JOIN Subject subj ON subj.SubjectID = offering.SubjectID
+            JOIN AcademicYear ay ON ay.AcademicYearID = enrol.AcademicYearID
+            JOIN School school ON school.SchoolID = student.SchoolID
+            WHERE student.StudentID = ? AND c.Role = 'Student' AND c.Status = 'Active'
+              AND school.Status = 'Approved' AND student.SchoolID = subj.SchoolID
+              AND student.SchoolID = ay.SchoolID AND offering.AcademicYearID = enrol.AcademicYearID
+            ORDER BY a.SessionDate DESC, subj.Code
+            """;
+        List<AttendanceEntry> result = new ArrayList<>();
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, studentID);
+            try (ResultSet rows = statement.executeQuery()) {
+                while (rows.next()) {
+                    result.add(new AttendanceEntry(rows.getString("Code"), rows.getString("SubjectName"),
+                            rows.getString("YearName"), rows.getDate("SessionDate").toLocalDate(),
+                            rows.getInt("WeekNumber"), rows.getString("Status"), rows.getString("ApprovalStatus")));
+                }
+            }
+        }
+        return result;
+    }
 }
