@@ -13,10 +13,18 @@ import com.highschoolportal.model.User;
 import com.highschoolportal.services.AuthenticationService;
 import com.highschoolportal.services.RememberMeCoordinator;
 import com.highschoolportal.ui.PageNames;
-import com.highschoolportal.ui.adminpages.*;
+import com.highschoolportal.ui.adminpages.AdminManagerPasswordResetUI;
+import com.highschoolportal.ui.adminpages.ApprovedSchoolsUI;
+import com.highschoolportal.ui.adminpages.ApprovedSuperManagersUI;
+import com.highschoolportal.ui.adminpages.PendingSchoolsUI;
+import com.highschoolportal.ui.adminpages.PendingSuperManagersUI;
+import com.highschoolportal.ui.adminpages.SystemAdminHomePageUI;
 import com.highschoolportal.ui.managerpages.BusinessRuleUI;
+import com.highschoolportal.ui.managerpages.CreateStudentUI;
 import com.highschoolportal.ui.managerpages.ManagerHomePageUI;
 import com.highschoolportal.ui.managerpages.ManagerPasswordManagementUI;
+import com.highschoolportal.ui.managerpages.ManagerPasswordResetRequestUI;
+import com.highschoolportal.ui.managerpages.ManagerStudentManagementUI;
 import com.highschoolportal.ui.managerpages.ManagerSubjectsUI;
 import com.highschoolportal.ui.managerpages.ManagerTeacherUI;
 import com.highschoolportal.ui.managerpages.SchoolSignupUI;
@@ -24,7 +32,10 @@ import com.highschoolportal.ui.shared.LoginUI;
 import com.highschoolportal.ui.shared.PasswordResetRequestUI;
 import com.highschoolportal.ui.shared.UpdatePasswordUI;
 import com.highschoolportal.ui.studentpages.StudentHomePageUI;
+import com.highschoolportal.ui.studentpages.TeachingMaterialsUI;
 import com.highschoolportal.ui.teacherpages.TeacherHomePageUI;
+import com.highschoolportal.ui.teacherpages.TeacherSubjectStudentsUI;
+import com.highschoolportal.ui.teacherpages.UploadTeachingMaterialUI;
 
 public class App {
 
@@ -35,12 +46,8 @@ public class App {
     private User currentUser;
     private Credentials.Role currentRole;
     private boolean passwordChangeRequired;
-    private final RememberMeCoordinator rememberMe
-            = new RememberMeCoordinator();
+    private final RememberMeCoordinator rememberMe = new RememberMeCoordinator();
 
-    // public App() {
-    //     this(null);
-    // }
     public App() {
 
         pageHistory = new Stack<>();
@@ -58,12 +65,8 @@ public class App {
 
         mainFrame.add(innerContainer);
 
-        // this code segment should be implemented in LoginUI, but right now we're testing things out
-        // In LoginUI, we need to know the user role so that we create the correct object and open the right homepage.
-        // LoginUI could/maybe should use setCurrentUser() method ======> app.setCurrentUser(new Manager(.....))
         showPage(PageNames.LOGIN);
 
-        // keep this segment
         mainFrame.setVisible(true);
         restoreRememberedLogin();
     }
@@ -83,36 +86,23 @@ public class App {
     public void showPage(String pageName) {
 
         if (currentUser == null) {
-            boolean publicPage
-                    = pageName.equals(PageNames.LOGIN)
+
+            boolean publicPage = pageName.equals(PageNames.LOGIN)
                     || pageName.equals(PageNames.MANAGER_SCHOOL_SIGNUP)
-                    || pageName.equals(PageNames.PASSWORD_RESET_REQUEST);
+                    || pageName.equals(PageNames.PASSWORD_RESET_REQUEST)
+                    || pageName.equals(PageNames.MANAGER_PASSWORD_RESET_REQUEST);
 
             if (!publicPage) {
                 pageName = PageNames.LOGIN;
             }
+
         } else if (passwordChangeRequired) {
             pageName = PageNames.UPDATE_PASSWORD;
         }
 
         if (currentUser != null && !passwordChangeRequired) {
 
-            boolean allowed = switch (pageName) {
-                case PageNames.ADMIN_HOMEPAGE ->
-                    currentRole == Credentials.Role.Admin;
-
-                case PageNames.MANAGER_HOMEPAGE ->
-                    currentRole == Credentials.Role.Manager;
-
-                case PageNames.TEACHER_HOMEPAGE ->
-                    currentRole == Credentials.Role.Teacher;
-
-                case PageNames.STUDENT_HOMEPAGE ->
-                    currentRole == Credentials.Role.Student;
-
-                default ->
-                    true;
-            };
+            boolean allowed = isPageAllowed(pageName);
 
             if (!allowed) {
                 return;
@@ -123,7 +113,42 @@ public class App {
         pageHistory.push(pageName);
     }
 
+    private boolean isPageAllowed(String pageName) {
+
+        return switch (pageName) {
+
+            case PageNames.ADMIN_HOMEPAGE,
+                 PageNames.ADMIN_PENDING_SUPER_MANAGERS,
+                 PageNames.ADMIN_APPROVED_SUPER_MANAGERS,
+                 PageNames.ADMIN_APPROVED_SCHOOLS,
+                 PageNames.ADMIN_PENDING_SCHOOLS,
+                 PageNames.ADMIN_MANAGER_PASSWORD_RESET ->
+                    currentRole == Credentials.Role.Admin;
+
+            case PageNames.MANAGER_HOMEPAGE,
+                 PageNames.MANAGER_ACADEMIC_YEAR_MANAGEMENT,
+                 PageNames.MANAGER_SUBJECT_MANAGEMENT,
+                 PageNames.MANAGER_PASSWORD_MANAGEMENT,
+                 PageNames.MANAGER_TEACHER_MANAGEMENT,
+                 PageNames.CREATE_STUDENT,
+                 PageNames.MANAGER_STUDENT_MANAGEMENT ->
+                    currentRole == Credentials.Role.Manager;
+
+            case PageNames.TEACHER_HOMEPAGE,
+                 PageNames.TEACHER_SUBJECT_STUDENTS,
+                 PageNames.TEACHER_UPLOAD_TEACHING_MATERIAL ->
+                    currentRole == Credentials.Role.Teacher;
+
+            case PageNames.STUDENT_HOMEPAGE,
+                 PageNames.STUDENT_TEACHING_MATERIALS ->
+                    currentRole == Credentials.Role.Student;
+
+            default -> true;
+        };
+    }
+
     public void goBack() {
+
         if (pageHistory.size() <= 1) {
             return;
         }
@@ -135,13 +160,16 @@ public class App {
     }
 
     private void addPages() {
+
         innerContainer.add(new LoginUI(this), PageNames.LOGIN);
+
         // Admin Pages
         innerContainer.add(new SystemAdminHomePageUI(this), PageNames.ADMIN_HOMEPAGE);
         innerContainer.add(new PendingSuperManagersUI(this), PageNames.ADMIN_PENDING_SUPER_MANAGERS);
         innerContainer.add(new ApprovedSuperManagersUI(this), PageNames.ADMIN_APPROVED_SUPER_MANAGERS);
         innerContainer.add(new ApprovedSchoolsUI(this), PageNames.ADMIN_APPROVED_SCHOOLS);
         innerContainer.add(new PendingSchoolsUI(this), PageNames.ADMIN_PENDING_SCHOOLS);
+        innerContainer.add(new AdminManagerPasswordResetUI(this), PageNames.ADMIN_MANAGER_PASSWORD_RESET);
 
         // Manager Pages
         innerContainer.add(new ManagerHomePageUI(this), PageNames.MANAGER_HOMEPAGE);
@@ -149,17 +177,26 @@ public class App {
         innerContainer.add(new BusinessRuleUI(this), PageNames.MANAGER_ACADEMIC_YEAR_MANAGEMENT);
         innerContainer.add(new ManagerSubjectsUI(this), PageNames.MANAGER_SUBJECT_MANAGEMENT);
         innerContainer.add(new ManagerPasswordManagementUI(this), PageNames.MANAGER_PASSWORD_MANAGEMENT);
+        innerContainer.add(new ManagerPasswordResetRequestUI(), PageNames.MANAGER_PASSWORD_RESET_REQUEST);
         innerContainer.add(new ManagerTeacherUI(this), PageNames.MANAGER_TEACHER_MANAGEMENT);
+        innerContainer.add(new CreateStudentUI(this), PageNames.CREATE_STUDENT);
+        innerContainer.add(new ManagerStudentManagementUI(this), PageNames.MANAGER_STUDENT_MANAGEMENT);
 
         // Teacher and Student password pages
         innerContainer.add(new PasswordResetRequestUI(), PageNames.PASSWORD_RESET_REQUEST);
         innerContainer.add(new UpdatePasswordUI(this), PageNames.UPDATE_PASSWORD);
+
+        // Teacher Pages
         innerContainer.add(new TeacherHomePageUI(this), PageNames.TEACHER_HOMEPAGE);
+        innerContainer.add(new TeacherSubjectStudentsUI(this), PageNames.TEACHER_SUBJECT_STUDENTS);
+        innerContainer.add(new UploadTeachingMaterialUI(this), PageNames.TEACHER_UPLOAD_TEACHING_MATERIAL);
+
+        // Student Pages
         innerContainer.add(new StudentHomePageUI(this), PageNames.STUDENT_HOMEPAGE);
+        innerContainer.add(new TeachingMaterialsUI(this), PageNames.STUDENT_TEACHING_MATERIALS);
     }
 
-    public void completeLogin(
-            AuthenticationService.LoginResult result) {
+    public void completeLogin(AuthenticationService.LoginResult result) {
 
         currentUser = result.user();
         currentRole = result.role();
@@ -175,24 +212,22 @@ public class App {
     }
 
     private void openHomePage() {
+
         if (currentUser == null || currentRole == null) {
             showPage(PageNames.LOGIN);
             return;
         }
 
         switch (currentRole) {
-            case Admin ->
-                showPage(PageNames.ADMIN_HOMEPAGE);
-            case Manager ->
-                showPage(PageNames.MANAGER_HOMEPAGE);
-            case Teacher ->
-                showPage(PageNames.TEACHER_HOMEPAGE);
-            case Student ->
-                showPage(PageNames.STUDENT_HOMEPAGE);
+            case Admin -> showPage(PageNames.ADMIN_HOMEPAGE);
+            case Manager -> showPage(PageNames.MANAGER_HOMEPAGE);
+            case Teacher -> showPage(PageNames.TEACHER_HOMEPAGE);
+            case Student -> showPage(PageNames.STUDENT_HOMEPAGE);
         }
     }
 
     public void passwordChangeCompleted() {
+
         if (currentUser == null || !passwordChangeRequired) {
             return;
         }
@@ -203,6 +238,7 @@ public class App {
     }
 
     public void logout() {
+
         currentUser = null;
         currentRole = null;
         passwordChangeRequired = false;
@@ -225,27 +261,21 @@ public class App {
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(
                             mainFrame,
-                            "Logged out locally, but session revocation "
-                            + "could not be confirmed.",
+                            "Logged out locally, but session revocation could not be confirmed.",
                             "Logout Warning",
                             JOptionPane.WARNING_MESSAGE
                     );
                 }
             }
         }.execute();
-
     }
 
     private void restoreRememberedLogin() {
 
-        new SwingWorker<
-            java.util.Optional<AuthenticationService.LoginResult>, Void>() {
+        new SwingWorker<java.util.Optional<AuthenticationService.LoginResult>, Void>() {
 
             @Override
-            protected java.util.Optional<
-                AuthenticationService.LoginResult>
-                    doInBackground() throws Exception {
-
+            protected java.util.Optional<AuthenticationService.LoginResult> doInBackground() throws Exception {
                 return rememberMe.restore();
             }
 
@@ -259,10 +289,7 @@ public class App {
                     }
 
                 } catch (Exception e) {
-                    System.err.println(
-                            "Remember Me restoration failed: "
-                            + e.getMessage()
-                    );
+                    System.err.println("Remember Me restoration failed: " + e.getMessage());
                 }
             }
         }.execute();
