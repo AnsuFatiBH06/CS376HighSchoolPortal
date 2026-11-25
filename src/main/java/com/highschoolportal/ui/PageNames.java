@@ -11,6 +11,8 @@ public class PageNames {
     public static final String MANAGER_ACADEMIC_YEAR_MANAGEMENT = "ACADEMIC_YEAR_MANAGEMENT";
     public static final String MANAGER_SUBJECT_MANAGEMENT = "SUBJECT_MANAGEMENT";
     public static final String MANAGER_TEACHER_MANAGEMENT = "MANAGER_TEACHER_MANAGEMENT";
+    public static final String CREATE_STUDENT = "CREATE_STUDENT";
+    public static final String MANAGER_ALL_STUDENTS = "MANAGER_ALL_STUDENTS";
 
     // Admin Pages
     public static final String ADMIN_HOMEPAGE = "ADMIN_HOMEPAGE";
