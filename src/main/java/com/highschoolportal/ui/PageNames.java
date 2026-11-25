@@ -12,7 +12,7 @@ public class PageNames {
     public static final String MANAGER_SUBJECT_MANAGEMENT = "SUBJECT_MANAGEMENT";
     public static final String MANAGER_TEACHER_MANAGEMENT = "MANAGER_TEACHER_MANAGEMENT";
     public static final String CREATE_STUDENT = "CREATE_STUDENT";
-    public static final String MANAGER_ALL_STUDENTS = "MANAGER_ALL_STUDENTS";
+    public static final String MANAGER_STUDENT_MANAGEMENT = "MANAGER_STUDENT_MANAGEMENT";
 
     // Admin Pages
     public static final String ADMIN_HOMEPAGE = "ADMIN_HOMEPAGE";
