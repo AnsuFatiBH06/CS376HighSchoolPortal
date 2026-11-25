@@ -105,4 +105,29 @@ public class PasswordResetService {
     throw new UnsupportedOperationException(
             "Manager password reset requests are not implemented yet.");
 }
+
+public java.util.List<PasswordResetRequest> getPendingManagerRequests()
+        throws SQLException {
+
+    // This will be implemented after all UI pages are added.
+    throw new UnsupportedOperationException(
+            "Manager password reset requests are not implemented yet.");
+}
+
+public void approveManagerRequest(int requestID, int adminCredentialsID)
+        throws SQLException {
+
+    // This will be implemented after all UI pages are added.
+    throw new UnsupportedOperationException(
+            "Manager password reset approval is not implemented yet.");
+}
+
+public void rejectManagerRequest(int requestID, int adminCredentialsID)
+        throws SQLException {
+
+    // This will be implemented after all UI pages are added.
+    throw new UnsupportedOperationException(
+            "Manager password reset rejection is not implemented yet.");
+}
+
 }
