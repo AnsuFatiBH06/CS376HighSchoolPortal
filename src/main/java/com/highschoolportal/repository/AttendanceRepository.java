@@ -13,6 +13,21 @@ import java.util.List;
 
 /** Database access for student attendance; ownership is checked in SQL, not only the UI. */
 public class AttendanceRepository {
+    @FunctionalInterface
+    public interface ConnectionProvider {
+        Connection open() throws SQLException;
+    }
+
+    private final ConnectionProvider connections;
+
+    public AttendanceRepository() {
+        this(() -> MySQLConnect.getInstance().getConnection());
+    }
+
+    public AttendanceRepository(ConnectionProvider connections) {
+        this.connections = java.util.Objects.requireNonNull(connections);
+    }
+
 
     public record EnrolledSubject(int detailID, String subjectCode,
                                   String subjectName, String academicYear) {}
@@ -37,7 +52,7 @@ public class AttendanceRepository {
             ORDER BY ay.Name DESC, subj.Code
             """;
         List<EnrolledSubject> result = new ArrayList<>();
-        try (Connection connection = MySQLConnect.getInstance().getConnection();
+        try (Connection connection = connections.open();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, studentID);
             try (ResultSet rows = statement.executeQuery()) {
@@ -74,7 +89,7 @@ public class AttendanceRepository {
               AND offering.AcademicYearID = enrol.AcademicYearID
               AND d.IsFrozen = 0
             """;
-        try (Connection connection = MySQLConnect.getInstance().getConnection();
+        try (Connection connection = connections.open();
              PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setDate(1, Date.valueOf(sessionDate));
             statement.setInt(2, weekNumber);
@@ -113,7 +128,7 @@ public class AttendanceRepository {
             ORDER BY a.SessionDate DESC, subj.Code
             """;
         List<AttendanceEntry> result = new ArrayList<>();
-        try (Connection connection = MySQLConnect.getInstance().getConnection();
+        try (Connection connection = connections.open();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, studentID);
             try (ResultSet rows = statement.executeQuery()) {
@@ -157,7 +172,7 @@ public class AttendanceRepository {
             ORDER BY a.SessionDate DESC, subj.Code, student.LName, student.FName, a.AttendanceID
             """;
         List<PendingAttendance> result = new ArrayList<>();
-        try (Connection connection = MySQLConnect.getInstance().getConnection();
+        try (Connection connection = connections.open();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setInt(1, teacherID);
             try (ResultSet rows = statement.executeQuery()) {
@@ -199,7 +214,7 @@ public class AttendanceRepository {
               AND a.ApprovalStatus = 'Pending' AND d.IsFrozen = 0
               AND a.AttendanceID = ?
             """;
-        try (Connection connection = MySQLConnect.getInstance().getConnection();
+        try (Connection connection = connections.open();
              PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.setString(1, decision);
             statement.setInt(2, teacherID);

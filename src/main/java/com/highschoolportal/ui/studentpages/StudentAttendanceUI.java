@@ -1,17 +1,30 @@
 package com.highschoolportal.ui.studentpages;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridLayout;
+import java.time.LocalDate;
+import java.util.List;
+
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingWorker;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
 
 import com.highschoolportal.app.App;
 import com.highschoolportal.model.User;
-import com.highschoolportal.repository.AttendanceRepository.EnrolledSubject;
 import com.highschoolportal.repository.AttendanceRepository.AttendanceEntry;
+import com.highschoolportal.repository.AttendanceRepository.EnrolledSubject;
 import com.highschoolportal.services.AttendanceService;
 import com.highschoolportal.services.AttendanceService.AttendanceStatus;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.time.LocalDate;
-import java.util.List;
 
 /** Student attendance form and read-only submission history. */
 public class StudentAttendanceUI extends JPanel {
