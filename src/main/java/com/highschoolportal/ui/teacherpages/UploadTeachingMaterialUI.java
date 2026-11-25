@@ -78,11 +78,23 @@ public class UploadTeachingMaterialUI extends JPanel {
         chooseFileButton.addActionListener(event -> choosePDFFile());
         uploadButton.addActionListener(event -> uploadMaterial());
 
-        loadSubjects();
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent event) {
+                if (app.getCurrentUser() != null) {
+                    subjectOfferings.clear();
+                    subjectBox.removeAllItems();
+                    weekNumberField.setText("");
+                    selectedFileField.setText("");
+                    selectedPDFFile = null;
+                    loadSubjects();
+                }
+            }
+        });
     }
 
     private void addField(JPanel form, GridBagConstraints c,
-                          int row, String label, JComponent field) {
+            int row, String label, JComponent field) {
         c.gridx = 0;
         c.gridy = row;
         form.add(new JLabel(label), c);

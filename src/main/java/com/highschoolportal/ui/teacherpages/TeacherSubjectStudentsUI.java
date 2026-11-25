@@ -30,7 +30,7 @@ public class TeacherSubjectStudentsUI extends JPanel {
     private Map<Integer, String> subjectOfferings = new LinkedHashMap<>();
 
     private final DefaultTableModel model = new DefaultTableModel(new Object[]{
-            "Student ID", "Student Name", "Email"
+        "Student ID", "Student Name", "Email"
     }, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -54,7 +54,6 @@ public class TeacherSubjectStudentsUI extends JPanel {
 
         top.add(backButton, BorderLayout.WEST);
         top.add(heading, BorderLayout.SOUTH);
-        add(top, BorderLayout.NORTH);
 
         backButton.addActionListener(event -> app.goBack());
 
@@ -66,7 +65,10 @@ public class TeacherSubjectStudentsUI extends JPanel {
         JButton viewButton = new JButton("View Students");
         filters.add(viewButton);
 
-        add(filters, BorderLayout.NORTH);
+        JPanel header = new JPanel(new BorderLayout(0, 12));
+        header.add(top, BorderLayout.NORTH);
+        header.add(filters, BorderLayout.SOUTH);
+        add(header, BorderLayout.NORTH);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -79,10 +81,21 @@ public class TeacherSubjectStudentsUI extends JPanel {
         viewButton.addActionListener(event -> viewStudents());
         refreshButton.addActionListener(event -> loadSubjects());
 
-        loadSubjects();
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent event) {
+                if (app.getCurrentUser() != null) {
+                    model.setRowCount(0);
+                    subjectOfferings.clear();
+                    subjectBox.removeAllItems();
+                    loadSubjects();
+                }
+            }
+        });
     }
 
     private void loadSubjects() {
+        model.setRowCount(0);
         try {
             int teacherID = app.getCurrentUser().getUserID();
 
@@ -144,9 +157,9 @@ public class TeacherSubjectStudentsUI extends JPanel {
 
             for (SubjectStudent student : students) {
                 model.addRow(new Object[]{
-                        student.getStudentID(),
-                        student.getStudentName(),
-                        student.getEmail()
+                    student.getStudentID(),
+                    student.getStudentName(),
+                    student.getEmail()
                 });
             }
 

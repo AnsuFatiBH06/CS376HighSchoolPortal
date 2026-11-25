@@ -29,12 +29,12 @@ public class ManagerStudentManagementUI extends JPanel {
     private final JComboBox<String> certificateStatusBox = new JComboBox<>(
             new String[]{"All", "Qualified", "Unqualified", "Results Processing"});
 
-    private final JCheckBox incompleteCurriculumBox =
-            new JCheckBox("Incomplete curriculum only");
+    private final JCheckBox incompleteCurriculumBox
+            = new JCheckBox("Incomplete curriculum only");
 
     private final DefaultTableModel model = new DefaultTableModel(new Object[]{
-            "Student ID", "Student Name", "Email",
-            "Academic Year", "Certificate Status"
+        "Student ID", "Student Name", "Email",
+        "Academic Year", "Certificate Status"
     }, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -78,7 +78,10 @@ public class ManagerStudentManagementUI extends JPanel {
         filters.add(applyFiltersButton);
         filters.add(clearFiltersButton);
 
-        add(filters, BorderLayout.NORTH);
+        JPanel header = new JPanel(new BorderLayout(0, 12));
+        header.add(top, BorderLayout.NORTH);
+        header.add(filters, BorderLayout.SOUTH);
+        add(header, BorderLayout.NORTH);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -96,8 +99,18 @@ public class ManagerStudentManagementUI extends JPanel {
         refreshButton.addActionListener(event -> loadSubjectCodes());
         notifyButton.addActionListener(event -> notifySelectedStudent());
 
-        loadSubjectCodes();
-        showAllStudents();
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent event) {
+                if (app.getCurrentUser() instanceof com.highschoolportal.model.Manager) {
+                    model.setRowCount(0);
+                    certificateStatusBox.setSelectedIndex(0);
+                    incompleteCurriculumBox.setSelected(false);
+                    loadSubjectCodes();
+                    showAllStudents();
+                }
+            }
+        });
     }
 
     private int selectedStudentID() {
@@ -140,11 +153,11 @@ public class ManagerStudentManagementUI extends JPanel {
 
             for (StudentSummary student : students) {
                 model.addRow(new Object[]{
-                        student.getStudentID(),
-                        student.getStudentName(),
-                        student.getEmail(),
-                        student.getAcademicYearName(),
-                        student.getCertificateStatus()
+                    student.getStudentID(),
+                    student.getStudentName(),
+                    student.getEmail(),
+                    student.getAcademicYearName(),
+                    student.getCertificateStatus()
                 });
             }
 
@@ -167,34 +180,34 @@ public class ManagerStudentManagementUI extends JPanel {
         try {
             int managerID = app.getCurrentUser().getUserID();
 
-            String selectedSubjectCode =
-                    (String) subjectCodeBox.getSelectedItem();
-            String selectedCertificateStatus =
-                    (String) certificateStatusBox.getSelectedItem();
+            String selectedSubjectCode
+                    = (String) subjectCodeBox.getSelectedItem();
+            String selectedCertificateStatus
+                    = (String) certificateStatusBox.getSelectedItem();
 
             String subjectCode = "All".equals(selectedSubjectCode)
                     ? ""
                     : selectedSubjectCode;
 
-            String certificateStatus =
-                    "All".equals(selectedCertificateStatus)
-                            ? ""
-                            : selectedCertificateStatus;
+            String certificateStatus
+                    = "All".equals(selectedCertificateStatus)
+                    ? ""
+                    : selectedCertificateStatus;
 
             model.setRowCount(0);
 
             if (incompleteCurriculumBox.isSelected()) {
-                List<IncompleteCurriculumStudent> students =
-                        service.getStudentsWithIncompleteCurricula(managerID);
+                List<IncompleteCurriculumStudent> students
+                        = service.getStudentsWithIncompleteCurricula(managerID);
 
                 for (IncompleteCurriculumStudent student : students) {
                     model.addRow(new Object[]{
-                            student.getStudentID(),
-                            student.getStudentName(),
-                            student.getEmail(),
-                            student.getAcademicYearName(),
-                            student.getOptionalSubjectsSelected() + " / "
-                                    + student.getMinimumOptionalSubjects()
+                        student.getStudentID(),
+                        student.getStudentName(),
+                        student.getEmail(),
+                        student.getAcademicYearName(),
+                        student.getOptionalSubjectsSelected() + " / "
+                        + student.getMinimumOptionalSubjects()
                     });
                 }
 
@@ -216,11 +229,11 @@ public class ManagerStudentManagementUI extends JPanel {
 
             for (StudentSummary student : students) {
                 model.addRow(new Object[]{
-                        student.getStudentID(),
-                        student.getStudentName(),
-                        student.getEmail(),
-                        student.getAcademicYearName(),
-                        student.getCertificateStatus()
+                    student.getStudentID(),
+                    student.getStudentName(),
+                    student.getEmail(),
+                    student.getAcademicYearName(),
+                    student.getCertificateStatus()
                 });
             }
 

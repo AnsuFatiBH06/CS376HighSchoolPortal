@@ -1,18 +1,27 @@
 package com.highschoolportal.ui.studentpages;
 
-import com.highschoolportal.app.App;
-import com.highschoolportal.model.StudentTeachingMaterial;
-import com.highschoolportal.services.TeachingService;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.io.File;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+
+import com.highschoolportal.app.App;
+import com.highschoolportal.model.StudentTeachingMaterial;
+import com.highschoolportal.services.TeachingService;
 
 public class TeachingMaterialsUI extends JPanel {
 
@@ -24,8 +33,8 @@ public class TeachingMaterialsUI extends JPanel {
     private Map<Integer, String> subjectOfferings = new LinkedHashMap<>();
 
     private final DefaultTableModel model = new DefaultTableModel(new Object[]{
-            "Material ID", "Week", "Subject", "Teacher",
-            "Uploaded At", "File"
+        "Material ID", "Week", "Subject", "Teacher",
+        "Uploaded At", "File"
     }, 0) {
         @Override
         public boolean isCellEditable(int row, int column) {
@@ -49,7 +58,6 @@ public class TeachingMaterialsUI extends JPanel {
 
         top.add(backButton, BorderLayout.WEST);
         top.add(heading, BorderLayout.SOUTH);
-        add(top, BorderLayout.NORTH);
 
         backButton.addActionListener(event -> app.goBack());
 
@@ -61,7 +69,10 @@ public class TeachingMaterialsUI extends JPanel {
         JButton viewButton = new JButton("View Materials");
         filters.add(viewButton);
 
-        add(filters, BorderLayout.NORTH);
+        JPanel header = new JPanel(new BorderLayout(0, 12));
+        header.add(top, BorderLayout.NORTH);
+        header.add(filters, BorderLayout.SOUTH);
+        add(header, BorderLayout.NORTH);
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -78,10 +89,21 @@ public class TeachingMaterialsUI extends JPanel {
         refreshButton.addActionListener(event -> loadSubjects());
         downloadButton.addActionListener(event -> downloadSelectedMaterial());
 
-        loadSubjects();
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            @Override
+            public void componentShown(java.awt.event.ComponentEvent event) {
+                if (app.getCurrentUser() != null) {
+                    model.setRowCount(0);
+                    subjectOfferings.clear();
+                    subjectBox.removeAllItems();
+                    loadSubjects();
+                }
+            }
+        });
     }
 
     private void loadSubjects() {
+        model.setRowCount(0);
         try {
             int studentID = app.getCurrentUser().getUserID();
 
@@ -143,25 +165,25 @@ public class TeachingMaterialsUI extends JPanel {
 
             model.setRowCount(0);
 
-            List<StudentTeachingMaterial> materials =
-                    service.getStudentTeachingMaterials(
+            List<StudentTeachingMaterial> materials
+                    = service.getStudentTeachingMaterials(
                             studentID,
                             subjectAcademicYearID
                     );
 
-            DateTimeFormatter formatter =
-                    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            DateTimeFormatter formatter
+                    = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
             for (StudentTeachingMaterial material : materials) {
                 model.addRow(new Object[]{
-                        material.getMaterialID(),
-                        material.getWeekNumber(),
-                        material.getSubjectName(),
-                        material.getTeacherName(),
-                        material.getUploadDate() == null
-                                ? ""
-                                : material.getUploadDate().format(formatter),
-                        new File(material.getFilePath()).getName()
+                    material.getMaterialID(),
+                    material.getWeekNumber(),
+                    material.getSubjectName(),
+                    material.getTeacherName(),
+                    material.getUploadDate() == null
+                    ? ""
+                    : material.getUploadDate().format(formatter),
+                    new File(material.getFilePath()).getName()
                 });
             }
 
@@ -196,15 +218,51 @@ public class TeachingMaterialsUI extends JPanel {
 
         try {
             int studentID = app.getCurrentUser().getUserID();
+            File sourceFile = service.downloadTeachingMaterial(studentID, materialID);
 
-            File downloadedFile = service.downloadTeachingMaterial(
-                    studentID,
-                    materialID
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Save Teaching Material");
+            fileChooser.setSelectedFile(new File(sourceFile.getName()));
+
+            if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+                return;
+            }
+
+            File destinationFile = fileChooser.getSelectedFile();
+
+            if (!destinationFile.getName().toLowerCase(java.util.Locale.ROOT)
+                    .endsWith(".pdf")) {
+                destinationFile = new File(destinationFile.getAbsolutePath() + ".pdf");
+            }
+
+            if (sourceFile.getCanonicalFile().equals(destinationFile.getCanonicalFile())) {
+                JOptionPane.showMessageDialog(this,
+                        "Choose a different location from the original stored file.",
+                        "Download Material",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (destinationFile.exists()) {
+                int overwrite = JOptionPane.showConfirmDialog(this,
+                        "This file already exists. Replace it?",
+                        "Replace File",
+                        JOptionPane.YES_NO_OPTION);
+
+                if (overwrite != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+
+            java.nio.file.Files.copy(
+                    sourceFile.toPath(),
+                    destinationFile.toPath(),
+                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
             );
 
             JOptionPane.showMessageDialog(this,
-                    "Teaching material downloaded successfully.\n"
-                            + downloadedFile.getAbsolutePath());
+                    "Teaching material saved successfully.\n"
+                    + destinationFile.getAbsolutePath());
 
         } catch (Exception exception) {
             JOptionPane.showMessageDialog(this,
