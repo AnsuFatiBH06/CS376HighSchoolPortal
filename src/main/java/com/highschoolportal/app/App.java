@@ -27,6 +27,7 @@ import com.highschoolportal.ui.shared.PasswordResetRequestUI;
 import com.highschoolportal.ui.shared.UpdatePasswordUI;
 import com.highschoolportal.ui.studentpages.StudentAttendanceUI;
 import com.highschoolportal.ui.studentpages.StudentHomePageUI;
+import com.highschoolportal.ui.teacherpages.TeacherAttendanceUI;
 import com.highschoolportal.ui.teacherpages.TeacherHomePageUI;
 
 public class App {
@@ -107,7 +108,8 @@ public class App {
                 case PageNames.MANAGER_HOMEPAGE ->
                     currentRole == Credentials.Role.Manager;
 
-                case PageNames.TEACHER_HOMEPAGE ->
+                case PageNames.TEACHER_HOMEPAGE,
+                PageNames.TEACHER_ATTENDANCE  ->
                     currentRole == Credentials.Role.Teacher;
 
                 case PageNames.STUDENT_HOMEPAGE, PageNames.STUDENT_ATTENDANCE ->
@@ -158,6 +160,7 @@ public class App {
         innerContainer.add(new TeacherHomePageUI(this), PageNames.TEACHER_HOMEPAGE);
         innerContainer.add(new StudentHomePageUI(this), PageNames.STUDENT_HOMEPAGE);
         innerContainer.add(new StudentAttendanceUI(this), PageNames.STUDENT_ATTENDANCE);
+        innerContainer.add(new TeacherAttendanceUI(this), PageNames.TEACHER_ATTENDANCE);
     }
 
     public void completeLogin(

@@ -1,11 +1,15 @@
 package com.highschoolportal.ui.teacherpages;
 
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+
 import com.highschoolportal.app.App;
 import com.highschoolportal.ui.PageNames;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
 
 public class TeacherHomePageUI extends JPanel {
     public TeacherHomePageUI(App app) {
@@ -17,9 +21,13 @@ public class TeacherHomePageUI extends JPanel {
         JPanel actions = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JButton update = new JButton("Update Password");
         JButton request = new JButton("Request Password Reset");
+        JButton attendance = new JButton("Review Attendance");
         actions.add(update); actions.add(request);
+        actions.add(attendance);
         add(actions, BorderLayout.CENTER);
         update.addActionListener(event -> app.showPage(PageNames.UPDATE_PASSWORD));
         request.addActionListener(event -> app.showPage(PageNames.PASSWORD_RESET_REQUEST));
+        attendance.addActionListener(event -> app.showPage(PageNames.TEACHER_ATTENDANCE));
+        
     }
 }

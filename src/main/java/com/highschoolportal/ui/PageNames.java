@@ -27,6 +27,6 @@ public class PageNames {
 
     // Student Pages
     public static final String STUDENT_HOMEPAGE = "STUDENT_HOMEPAGE";
-
     public static final String STUDENT_ATTENDANCE = "STUDENT_ATTENDANCE";
+    public static final String TEACHER_ATTENDANCE = "TEACHER_ATTENDANCE";
 }
