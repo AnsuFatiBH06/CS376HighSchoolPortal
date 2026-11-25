@@ -89,11 +89,13 @@ public class PasswordResetService {
         }
     }
 
-    public void submitManagerRequest(String email, String newPassword)
+  
+public void submitManagerRequest(String email, String newPassword)
         throws SQLException {
 
     if (email == null || email.isBlank()) {
-        throw new IllegalArgumentException("Enter your school email address.");
+        throw new IllegalArgumentException(
+                "Enter your school email address.");
     }
 
     if (newPassword == null || newPassword.isBlank()) {
@@ -102,32 +104,77 @@ public class PasswordResetService {
 
     validatePassword(newPassword);
 
-    throw new UnsupportedOperationException(
-            "Manager password reset requests are not implemented yet.");
+    Integer credentialsID =
+            repository.findManagerCredentialsID(email);
+
+    if (credentialsID == null) {
+        throw new IllegalArgumentException(
+                "No School Manager account was found for that email.");
+    }
+
+    if (repository.hasPendingRequest(credentialsID)) {
+        throw new IllegalArgumentException(
+                "A password reset request is already pending.");
+    }
+
+    String requestedPasswordHash = BCrypt.withDefaults()
+            .hashToString(12, newPassword.toCharArray());
+
+    repository.insertManagerRequest(
+            credentialsID,
+            requestedPasswordHash
+    );
 }
 
-public java.util.List<PasswordResetRequest> getPendingManagerRequests()
+public List<PasswordResetRequest> getPendingManagerRequests()
         throws SQLException {
 
-    // This will be implemented after all UI pages are added.
-    throw new UnsupportedOperationException(
-            "Manager password reset requests are not implemented yet.");
+    return repository.findPendingManagerRequests();
 }
 
 public void approveManagerRequest(int requestID, int adminCredentialsID)
         throws SQLException {
 
-    // This will be implemented after all UI pages are added.
-    throw new UnsupportedOperationException(
-            "Manager password reset approval is not implemented yet.");
+    ensureSystemAdmin(adminCredentialsID);
+
+    repository.approveManagerRequest(requestID, adminCredentialsID);
 }
 
 public void rejectManagerRequest(int requestID, int adminCredentialsID)
         throws SQLException {
 
-    // This will be implemented after all UI pages are added.
-    throw new UnsupportedOperationException(
-            "Manager password reset rejection is not implemented yet.");
+    ensureSystemAdmin(adminCredentialsID);
+
+    repository.rejectManagerRequest(requestID, adminCredentialsID);
+}
+
+private void ensureSystemAdmin(int credentialsID) throws SQLException {
+
+    if (credentialsID <= 0) {
+        throw new IllegalArgumentException(
+                "A logged-in System Administrator is required.");
+    }
+
+    String sql = """
+            SELECT Role
+            FROM Credentials
+            WHERE CredentialsID = ?
+            """;
+
+    try (Connection connection = MySQLConnect.getInstance().getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        statement.setInt(1, credentialsID);
+
+        try (ResultSet result = statement.executeQuery()) {
+            if (!result.next()
+                    || !"Admin".equalsIgnoreCase(result.getString("Role"))) {
+                throw new IllegalArgumentException(
+                        "Only a System Administrator can process Manager "
+                                + "password reset requests.");
+            }
+        }
+    }
 }
 
 }
