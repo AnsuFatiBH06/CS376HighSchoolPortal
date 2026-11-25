@@ -1,15 +1,16 @@
 package com.highschoolportal.services;
 
-import at.favre.lib.crypto.bcrypt.BCrypt;
-import com.highschoolportal.database.MySQLConnect;
-import com.highschoolportal.model.PasswordResetRequest;
-import com.highschoolportal.repository.PasswordResetRequestRepository;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
+import com.highschoolportal.database.MySQLConnect;
+import com.highschoolportal.model.PasswordResetRequest;
+import com.highschoolportal.repository.PasswordResetRequestRepository;
+
+import at.favre.lib.crypto.bcrypt.BCrypt;
 
 public class PasswordResetService {
     private final PasswordResetRequestRepository repository = new PasswordResetRequestRepository();
@@ -87,4 +88,21 @@ public class PasswordResetService {
             throw new IllegalArgumentException("Password must contain at least 8 characters, an uppercase letter, a lowercase letter, a number, and a special character.");
         }
     }
+
+    public void submitManagerRequest(String email, String newPassword)
+        throws SQLException {
+
+    if (email == null || email.isBlank()) {
+        throw new IllegalArgumentException("Enter your school email address.");
+    }
+
+    if (newPassword == null || newPassword.isBlank()) {
+        throw new IllegalArgumentException("Enter a new password.");
+    }
+
+    validatePassword(newPassword);
+
+    throw new UnsupportedOperationException(
+            "Manager password reset requests are not implemented yet.");
+}
 }
