@@ -6,6 +6,7 @@ public class PageNames {
 
     // Manager Pages
     public static final String MANAGER_HOMEPAGE = "MANAGER_HOMEPAGE";
+    public static final String MANAGER_PASSWORD_RESET_REQUEST = "MANAGER_PASSWORD_RESET_REQUEST";
     public static final String MANAGER_SCHOOL_SIGNUP = "SCHOOL_SIGNUP";
     public static final String MANAGER_ACADEMIC_YEAR_MANAGEMENT = "ACADEMIC_YEAR_MANAGEMENT";
     public static final String MANAGER_SUBJECT_MANAGEMENT = "SUBJECT_MANAGEMENT";
