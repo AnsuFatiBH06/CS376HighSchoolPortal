@@ -1,16 +1,22 @@
 package com.highschoolportal.model;
 
 public class Manager extends User {
-    private String superManagerStatus;
+    public enum SuperManagerStatus {
+        NONE,
+        PENDING,
+        APPROVED
+    }
+
+    private SuperManagerStatus superManagerStatus;
     private int schoolID;
 
-    public Manager(int userID, String fName, String lName, String email, int credentialsID, String superManagerStatus) {
+    public Manager(int userID, String fName, String lName, String email, int credentialsID, SuperManagerStatus superManagerStatus) {
         super(userID, fName, lName, email, credentialsID);
         this.superManagerStatus = superManagerStatus;
         this.schoolID = -1;
     } // still doesnt belong to a school
 
-    public Manager(int userID, String fName, String lName, String email, int credentialsID, String superManagerStatus, int schoolID) {
+    public Manager(int userID, String fName, String lName, String email, int credentialsID, SuperManagerStatus superManagerStatus, int schoolID) {
         super(userID, fName, lName, email, credentialsID);
         this.superManagerStatus = superManagerStatus;
         this.schoolID = schoolID;
@@ -20,7 +26,11 @@ public class Manager extends User {
         return this.schoolID;
     }
 
-    public String getSuperManagerStatus() {
+    public SuperManagerStatus getSuperManagerStatus() {
         return this.superManagerStatus;
+    }
+
+    public void setSuperManagerStatus(SuperManagerStatus newStatus) {
+        this.superManagerStatus = newStatus;
     }
 }

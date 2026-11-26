@@ -1,15 +1,16 @@
 package com.highschoolportal.services;
 
-import at.favre.lib.crypto.bcrypt.BCrypt;
-import com.highschoolportal.database.MySQLConnect;
-import com.highschoolportal.model.PasswordResetRequest;
-import com.highschoolportal.repository.PasswordResetRequestRepository;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+
+import com.highschoolportal.database.MySQLConnect;
+import com.highschoolportal.model.PasswordResetRequest;
+import com.highschoolportal.repository.PasswordResetRequestRepository;
+
+import at.favre.lib.crypto.bcrypt.BCrypt;
 
 public class PasswordResetService {
     private final PasswordResetRequestRepository repository = new PasswordResetRequestRepository();
@@ -87,4 +88,93 @@ public class PasswordResetService {
             throw new IllegalArgumentException("Password must contain at least 8 characters, an uppercase letter, a lowercase letter, a number, and a special character.");
         }
     }
+
+  
+public void submitManagerRequest(String email, String newPassword)
+        throws SQLException {
+
+    if (email == null || email.isBlank()) {
+        throw new IllegalArgumentException(
+                "Enter your school email address.");
+    }
+
+    if (newPassword == null || newPassword.isBlank()) {
+        throw new IllegalArgumentException("Enter a new password.");
+    }
+
+    validatePassword(newPassword);
+
+    Integer credentialsID =
+            repository.findManagerCredentialsID(email);
+
+    if (credentialsID == null) {
+        throw new IllegalArgumentException(
+                "No School Manager account was found for that email.");
+    }
+
+    if (repository.hasPendingRequest(credentialsID)) {
+        throw new IllegalArgumentException(
+                "A password reset request is already pending.");
+    }
+
+    String requestedPasswordHash = BCrypt.withDefaults()
+            .hashToString(12, newPassword.toCharArray());
+
+    repository.insertManagerRequest(
+            credentialsID,
+            requestedPasswordHash
+    );
+}
+
+public List<PasswordResetRequest> getPendingManagerRequests()
+        throws SQLException {
+
+    return repository.findPendingManagerRequests();
+}
+
+public void approveManagerRequest(int requestID, int adminCredentialsID)
+        throws SQLException {
+
+    ensureSystemAdmin(adminCredentialsID);
+
+    repository.approveManagerRequest(requestID, adminCredentialsID);
+}
+
+public void rejectManagerRequest(int requestID, int adminCredentialsID)
+        throws SQLException {
+
+    ensureSystemAdmin(adminCredentialsID);
+
+    repository.rejectManagerRequest(requestID, adminCredentialsID);
+}
+
+private void ensureSystemAdmin(int credentialsID) throws SQLException {
+
+    if (credentialsID <= 0) {
+        throw new IllegalArgumentException(
+                "A logged-in System Administrator is required.");
+    }
+
+    String sql = """
+            SELECT Role
+            FROM Credentials
+            WHERE CredentialsID = ?
+            """;
+
+    try (Connection connection = MySQLConnect.getInstance().getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        statement.setInt(1, credentialsID);
+
+        try (ResultSet result = statement.executeQuery()) {
+            if (!result.next()
+                    || !"Admin".equalsIgnoreCase(result.getString("Role"))) {
+                throw new IllegalArgumentException(
+                        "Only a System Administrator can process Manager "
+                                + "password reset requests.");
+            }
+        }
+    }
+}
+
 }

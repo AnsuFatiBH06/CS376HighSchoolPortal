@@ -175,7 +175,7 @@ public class SchoolSignupUI extends JPanel {
                                     addressField.getText(),
                                     "Pending"
                                 );
-            if (new SchoolRegistrationService().registerSchool(school)) {
+            if (new SchoolRegistrationService().registerSchool(school, manager)) {
                 JOptionPane.showMessageDialog(this, "School registration submitted.");
                 clearForm();
                 this.app.goBack();

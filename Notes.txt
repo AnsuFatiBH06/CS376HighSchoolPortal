@@ -1,0 +1,3 @@
+ALSHAIKH'S NOTES TO SELF
+// subject-code dropdown requires the new getSubjectCodes(managerID) method
+// Test Manager Password Reset Request

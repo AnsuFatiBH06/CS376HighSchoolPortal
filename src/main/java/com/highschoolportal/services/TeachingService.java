@@ -12,7 +12,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.highschoolportal.database.MySQLConnect;
 import com.highschoolportal.model.StudentTeachingMaterial;
@@ -334,6 +336,93 @@ public class TeachingService {
             }
         }
     }
+
+    // Gets the subjects assigned to a teacher
+    public Map<Integer, String> getTeacherSubjectOfferings(int teacherID)
+        throws SQLException {
+
+    if (teacherID <= 0) {
+        throw new IllegalArgumentException("A logged-in Teacher is required");
+    }
+
+    String sql = """
+            SELECT
+                say.SubjectAcademicYearID,
+                CONCAT(s.Code, ' - ', s.Name, ' | ', ay.Name) AS SubjectDisplay
+            FROM SubjectAcademicYear say
+            JOIN Subject s
+                ON s.SubjectID = say.SubjectID
+            JOIN AcademicYear ay
+                ON ay.AcademicYearID = say.AcademicYearID
+            WHERE say.TeacherID = ?
+            ORDER BY s.Code ASC, ay.Name ASC
+            """;
+
+    Map<Integer, String> offerings = new LinkedHashMap<>();
+
+    try (Connection connection = MySQLConnect.getInstance().getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        statement.setInt(1, teacherID);
+
+        try (ResultSet result = statement.executeQuery()) {
+            while (result.next()) {
+                offerings.put(
+                        result.getInt("SubjectAcademicYearID"),
+                        result.getString("SubjectDisplay")
+                );
+            }
+        }
+    }
+
+    return offerings;
+}
+
+// Gets subjects a student is enrolled in
+public Map<Integer, String> getStudentSubjectOfferings(int studentID)
+        throws SQLException {
+
+    if (studentID <= 0) {
+        throw new IllegalArgumentException("A logged-in Student is required.");
+    }
+
+    String sql = """
+            SELECT DISTINCT
+                say.SubjectAcademicYearID,
+                CONCAT(s.Code, ' - ', s.Name, ' | ', ay.Name) AS SubjectDisplay
+            FROM Details d
+            JOIN StudentAcademicYear sayStudent
+                ON sayStudent.StudentAcademicYearID = d.StudentAcademicYearID
+            JOIN SubjectAcademicYear say
+                ON say.SubjectAcademicYearID = d.SubjectAcademicYearID
+            JOIN Subject s
+                ON s.SubjectID = say.SubjectID
+            JOIN AcademicYear ay
+                ON ay.AcademicYearID = say.AcademicYearID
+            WHERE sayStudent.StudentID = ?
+            ORDER BY s.Code ASC, ay.Name ASC
+            """;
+
+    Map<Integer, String> offerings = new LinkedHashMap<>();
+
+    try (Connection connection = MySQLConnect.getInstance().getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        statement.setInt(1, studentID);
+
+        try (ResultSet result = statement.executeQuery()) {
+            while (result.next()) {
+                offerings.put(
+                        result.getInt("SubjectAcademicYearID"),
+                        result.getString("SubjectDisplay")
+                );
+            }
+        }
+    }
+
+    return offerings;
+}
+
 }
 
 

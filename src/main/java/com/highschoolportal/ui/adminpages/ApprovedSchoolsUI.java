@@ -46,8 +46,12 @@ public class ApprovedSchoolsUI extends JPanel {
                                 "Address",
                                 "Status"
                         },
-                        0
-                );
+                        0) {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
 
         schoolsTable = new JTable(tableModel);
 

@@ -539,7 +539,7 @@ public class StudentManagementService {
     }
 
     // Validates the filters entered by a school manager
-    static String validateStudentFilters(String subjectCode, String certificateStatus) {
+    public static String validateStudentFilters(String subjectCode, String certificateStatus) {
 
         // The subject code is optional
         if (subjectCode != null && !subjectCode.isBlank()) {
@@ -715,4 +715,33 @@ public class StudentManagementService {
         // Signifies that the notification is valid
         return null;
     }
+
+    // Gets school's subjects
+    public List<String> getSubjectCodes(int managerID) throws SQLException {
+
+    int schoolID = findManagerSchoolID(managerID);
+
+    String sql = """
+            SELECT DISTINCT s.Code
+            FROM Subject s
+            WHERE s.SchoolID = ?
+            ORDER BY s.Code ASC
+            """;
+
+    List<String> subjectCodes = new ArrayList<>();
+
+    try (Connection connection = MySQLConnect.getInstance().getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        statement.setInt(1, schoolID);
+
+        try (ResultSet result = statement.executeQuery()) {
+            while (result.next()) {
+                subjectCodes.add(result.getString("Code"));
+            }
+        }
+    }
+
+    return subjectCodes;
+}
 }

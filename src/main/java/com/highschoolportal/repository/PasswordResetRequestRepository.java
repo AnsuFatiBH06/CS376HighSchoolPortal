@@ -1,11 +1,16 @@
 package com.highschoolportal.repository;
 
-import com.highschoolportal.database.MySQLConnect;
-import com.highschoolportal.model.PasswordResetRequest;
-
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.highschoolportal.database.MySQLConnect;
+import com.highschoolportal.model.PasswordResetRequest;
 
 public class PasswordResetRequestRepository {
 
@@ -170,4 +175,227 @@ public class PasswordResetRequestRepository {
             }
         }
     }
+
+    public Integer findManagerCredentialsID(String email) throws SQLException {
+
+    String sql = """
+            SELECT CredentialsID
+            FROM Manager
+            WHERE LOWER(Email) = LOWER(?)
+            """;
+
+    try (Connection connection = MySQLConnect.getInstance().getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        statement.setString(1, email.trim());
+
+        try (ResultSet result = statement.executeQuery()) {
+            if (!result.next()) {
+                return null;
+            }
+
+            int credentialsID = result.getInt("CredentialsID");
+
+            if (result.next()) {
+                throw new SQLException(
+                        "Email belongs to more than one Manager account.");
+            }
+
+            return credentialsID;
+        }
+    }
+}
+
+public void insertManagerRequest(int credentialsID, String requestedPasswordHash)
+        throws SQLException {
+
+    String sql = """
+            INSERT INTO PasswordResetRequest
+            (CredentialsID, RequestedPasswordHash, Status, RequestedAt)
+            VALUES (?, ?, 'Pending', CURRENT_TIMESTAMP)
+            """;
+
+    try (Connection connection = MySQLConnect.getInstance().getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        statement.setInt(1, credentialsID);
+        statement.setString(2, requestedPasswordHash);
+        statement.executeUpdate();
+    }
+}
+
+public List<PasswordResetRequest> findPendingManagerRequests()
+        throws SQLException {
+
+    String sql = """
+            SELECT
+                pr.RequestID,
+                pr.CredentialsID,
+                pr.Status,
+                pr.RequestedAt,
+                c.Role,
+                m.FName,
+                m.LName,
+                m.Email
+            FROM PasswordResetRequest pr
+            JOIN Credentials c
+                ON c.CredentialsID = pr.CredentialsID
+            JOIN Manager m
+                ON m.CredentialsID = c.CredentialsID
+            WHERE pr.Status = 'Pending'
+              AND c.Role = 'Manager'
+            ORDER BY pr.RequestedAt ASC
+            """;
+
+    List<PasswordResetRequest> requests = new ArrayList<>();
+
+    try (Connection connection = MySQLConnect.getInstance().getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql);
+         ResultSet result = statement.executeQuery()) {
+
+        while (result.next()) {
+            Timestamp requestedAt = result.getTimestamp("RequestedAt");
+
+            requests.add(new PasswordResetRequest(
+                    result.getInt("RequestID"),
+                    result.getInt("CredentialsID"),
+                    result.getString("FName"),
+                    result.getString("LName"),
+                    result.getString("Email"),
+                    result.getString("Role"),
+                    result.getString("Status"),
+                    requestedAt == null
+                            ? null
+                            : requestedAt.toLocalDateTime()
+            ));
+        }
+    }
+
+    return requests;
+}
+
+public void approveManagerRequest(int requestID, int adminCredentialsID)
+        throws SQLException {
+
+    String requestSql = """
+            SELECT CredentialsID, RequestedPasswordHash
+            FROM PasswordResetRequest
+            WHERE RequestID = ?
+              AND Status = 'Pending'
+            FOR UPDATE
+            """;
+
+    String credentialSql = """
+            UPDATE Credentials
+            SET PasswordHash = ?,
+                MustChangePassword = TRUE
+            WHERE CredentialsID = ?
+            """;
+
+    String requestUpdateSql = """
+            UPDATE PasswordResetRequest
+            SET Status = 'Approved',
+                ReviewedAt = CURRENT_TIMESTAMP,
+                ReviewedByCredentialsID = ?
+            WHERE RequestID = ?
+              AND Status = 'Pending'
+            """;
+
+    try (Connection connection = MySQLConnect.getInstance().getConnection()) {
+
+        connection.setAutoCommit(false);
+
+        try {
+            int credentialsID;
+            String requestedPasswordHash;
+
+            try (PreparedStatement statement =
+                         connection.prepareStatement(requestSql)) {
+
+                statement.setInt(1, requestID);
+
+                try (ResultSet result = statement.executeQuery()) {
+                    if (!result.next()) {
+                        throw new SQLException(
+                                "The request is no longer pending.");
+                    }
+
+                    credentialsID = result.getInt("CredentialsID");
+                    requestedPasswordHash =
+                            result.getString("RequestedPasswordHash");
+                }
+            }
+
+            if (requestedPasswordHash == null
+                    || requestedPasswordHash.isBlank()) {
+                throw new SQLException(
+                        "This request does not contain a requested password.");
+            }
+
+            try (PreparedStatement statement =
+                         connection.prepareStatement(credentialSql)) {
+
+                statement.setString(1, requestedPasswordHash);
+                statement.setInt(2, credentialsID);
+
+                if (statement.executeUpdate() != 1) {
+                    throw new SQLException(
+                            "Could not update the Manager credentials.");
+                }
+            }
+
+            try (PreparedStatement statement =
+                         connection.prepareStatement(requestUpdateSql)) {
+
+                statement.setInt(1, adminCredentialsID);
+                statement.setInt(2, requestID);
+
+                if (statement.executeUpdate() != 1) {
+                    throw new SQLException(
+                            "Could not complete the Manager reset request.");
+                }
+            }
+
+            connection.commit();
+
+        } catch (Exception exception) {
+            connection.rollback();
+
+            if (exception instanceof SQLException sqlException) {
+                throw sqlException;
+            }
+
+            throw new SQLException(
+                    "Manager password reset approval failed.",
+                    exception);
+
+        } finally {
+            connection.setAutoCommit(true);
+        }
+    }
+}
+
+public void rejectManagerRequest(int requestID, int adminCredentialsID)
+        throws SQLException {
+
+    String sql = """
+            UPDATE PasswordResetRequest
+            SET Status = 'Rejected',
+                ReviewedAt = CURRENT_TIMESTAMP,
+                ReviewedByCredentialsID = ?
+            WHERE RequestID = ?
+              AND Status = 'Pending'
+            """;
+
+    try (Connection connection = MySQLConnect.getInstance().getConnection();
+         PreparedStatement statement = connection.prepareStatement(sql)) {
+
+        statement.setInt(1, adminCredentialsID);
+        statement.setInt(2, requestID);
+
+        if (statement.executeUpdate() != 1) {
+            throw new SQLException("The request is no longer pending.");
+        }
+    }
+}
 }
