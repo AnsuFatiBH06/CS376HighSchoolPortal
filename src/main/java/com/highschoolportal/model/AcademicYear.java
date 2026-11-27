@@ -1,8 +1,10 @@
+
 package com.highschoolportal.model;
 
 import java.time.LocalDate;
 
 public class AcademicYear {
+
     private final int academicYearID;
     private final int schoolID;
     private final String name;
@@ -12,11 +14,47 @@ public class AcademicYear {
     private final int maxOptionalSubjects;
     private final int requiredPassedSubjects;
     private final boolean examPeriodOpen;
+    private final boolean ended;
 
-    public AcademicYear(int academicYearID, int schoolID, String name,
-                        LocalDate startDate, LocalDate endDate,
-                        int minOptionalSubjects, int maxOptionalSubjects,
-                        int requiredPassedSubjects, boolean examPeriodOpen) {
+    // Existing constructor retained for compatibility
+    public AcademicYear(
+            int academicYearID,
+            int schoolID,
+            String name,
+            LocalDate startDate,
+            LocalDate endDate,
+            int minOptionalSubjects,
+            int maxOptionalSubjects,
+            int requiredPassedSubjects,
+            boolean examPeriodOpen) {
+
+        this(
+                academicYearID,
+                schoolID,
+                name,
+                startDate,
+                endDate,
+                minOptionalSubjects,
+                maxOptionalSubjects,
+                requiredPassedSubjects,
+                examPeriodOpen,
+                false
+        );
+    }
+
+    // Constructor including the academic-year completion state
+    public AcademicYear(
+            int academicYearID,
+            int schoolID,
+            String name,
+            LocalDate startDate,
+            LocalDate endDate,
+            int minOptionalSubjects,
+            int maxOptionalSubjects,
+            int requiredPassedSubjects,
+            boolean examPeriodOpen,
+            boolean ended) {
+
         this.academicYearID = academicYearID;
         this.schoolID = schoolID;
         this.name = name;
@@ -26,6 +64,7 @@ public class AcademicYear {
         this.maxOptionalSubjects = maxOptionalSubjects;
         this.requiredPassedSubjects = requiredPassedSubjects;
         this.examPeriodOpen = examPeriodOpen;
+        this.ended = ended;
     }
 
     public int getAcademicYearID() {
@@ -62,5 +101,9 @@ public class AcademicYear {
 
     public boolean isExamPeriodOpen() {
         return examPeriodOpen;
+    }
+
+    public boolean isEnded() {
+        return ended;
     }
 }
