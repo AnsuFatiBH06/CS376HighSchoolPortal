@@ -31,6 +31,7 @@ import com.highschoolportal.ui.managerpages.SchoolSignupUI;
 import com.highschoolportal.ui.shared.LoginUI;
 import com.highschoolportal.ui.shared.PasswordResetRequestUI;
 import com.highschoolportal.ui.shared.UpdatePasswordUI;
+import com.highschoolportal.ui.studentpages.StudentCurriculumUI;
 import com.highschoolportal.ui.studentpages.StudentHomePageUI;
 import com.highschoolportal.ui.studentpages.TeachingMaterialsUI;
 import com.highschoolportal.ui.teacherpages.TeacherHomePageUI;
@@ -193,6 +194,7 @@ public class App {
 
         // Student Pages
         innerContainer.add(new StudentHomePageUI(this), PageNames.STUDENT_HOMEPAGE);
+        innerContainer.add(new StudentCurriculumUI(this), PageNames.STUDENT_CURRICULUM);
         innerContainer.add(new TeachingMaterialsUI(this), PageNames.STUDENT_TEACHING_MATERIALS);
     }
 

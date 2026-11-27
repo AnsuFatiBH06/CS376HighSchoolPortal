@@ -10,6 +10,7 @@ import java.util.Optional;
 import com.highschoolportal.database.MySQLConnect;
 import com.highschoolportal.model.Credentials;
 import com.highschoolportal.model.Manager;
+import com.highschoolportal.model.Student;
 import com.highschoolportal.model.SystemAdmin;
 import com.highschoolportal.model.User;
 import com.highschoolportal.model.Manager.SuperManagerStatus;
@@ -105,11 +106,26 @@ public class UserRepository {
                         }
                     }
 
-                    case Teacher, Student ->
+                    case Teacher -> 
                         user = new User(
                             userId, firstName, lastName,
                             email, accountId
                         );
+
+                    case Student -> {
+                        Integer schoolId = (Integer)
+                            result.getObject("SchoolID");
+                            if (schoolId == null) {
+                                user = new Student(
+                                    userId, firstName, lastName,
+                                    email, accountId
+                                );
+                            } else {
+                                user = new Student(
+                                    userId, firstName, lastName,
+                                    email, accountId, schoolId);
+                            }
+                    }
 
                     default ->
                         throw new SQLException("Unsupported role");
