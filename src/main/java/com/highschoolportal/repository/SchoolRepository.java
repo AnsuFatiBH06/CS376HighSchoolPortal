@@ -1,12 +1,16 @@
 package com.highschoolportal.repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.highschoolportal.database.MySQLConnect;
 import com.highschoolportal.model.Manager;
 import com.highschoolportal.model.School;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SchoolRepository {
     public boolean insertPendingSchool(School school, Manager manager) throws SQLException {
@@ -181,8 +185,7 @@ public class SchoolRepository {
                         JOIN Student s ON s.StudentID = sn.StudentID
                         WHERE s.SchoolID = ?
                         """, schoolID);
-
-                // Delete attendance records associated with student details.
+                // Delete attendance records belonging to this school's students.
                 executeUpdate(connection, """
                         DELETE a
                         FROM Attendance a
@@ -192,8 +195,7 @@ public class SchoolRepository {
                         JOIN Student s ON s.StudentID = say.StudentID
                         WHERE s.SchoolID = ?
                         """, schoolID);
-
-                // Delete exam marks associated with student details.
+                // Delete exam marks belonging to this school's students.
                 executeUpdate(connection, """
                         DELETE em
                         FROM ExamMark em
@@ -235,27 +237,14 @@ public class SchoolRepository {
                         WHERE ay.SchoolID = ?
                         """, schoolID);
 
-                // Delete student subject details.
+                // Delete details belonging to this school's students.
                 executeUpdate(connection, """
                         DELETE d
                         FROM Details d
                         JOIN StudentAcademicYear say
-                            ON say.StudentAcademicYearID =
-                               d.StudentAcademicYearID
+                            ON say.StudentAcademicYearID = d.StudentAcademicYearID
                         JOIN Student s ON s.StudentID = say.StudentID
                         WHERE s.SchoolID = ?
-                        """, schoolID);
-
-                // Also remove details for offerings belonging to this school.
-                executeUpdate(connection, """
-                        DELETE d
-                        FROM Details d
-                        JOIN SubjectAcademicYear offer
-                            ON offer.SubjectAcademicYearID =
-                               d.SubjectAcademicYearID
-                        JOIN AcademicYear ay
-                            ON ay.AcademicYearID = offer.AcademicYearID
-                        WHERE ay.SchoolID = ?
                         """, schoolID);
 
                 // Delete student academic-year enrolments.
@@ -274,7 +263,23 @@ public class SchoolRepository {
                             ON ay.AcademicYearID = offer.AcademicYearID
                         WHERE ay.SchoolID = ?
                         """, schoolID);
+                executeUpdate(connection, """
+                        UPDATE RememberMeToken r
+                        JOIN Credentials c ON c.CredentialsID = r.CredentialsID
+                        JOIN Student s ON s.CredentialsID = c.CredentialsID
+                        SET r.RevokedAt = CURRENT_TIMESTAMP
+                        WHERE s.SchoolID = ?
+                          AND r.RevokedAt IS NULL
+                        """, schoolID);
 
+                executeUpdate(connection, """
+                        UPDATE RememberMeToken r
+                        JOIN Credentials c ON c.CredentialsID = r.CredentialsID
+                        JOIN Teacher t ON t.CredentialsID = c.CredentialsID
+                        SET r.RevokedAt = CURRENT_TIMESTAMP
+                        WHERE t.SchoolID = ?
+                          AND r.RevokedAt IS NULL
+                        """, schoolID);
                 // Disable student credentials before deleting student profiles.
                 executeUpdate(connection, """
                         UPDATE Credentials c
@@ -315,13 +320,12 @@ public class SchoolRepository {
                         WHERE SchoolID = ?
                         """, schoolID);
 
-                // Detach the Manager without deleting their account.
+                // Detach all Managers from the school without deleting their accounts.
                 executeUpdate(connection, """
                         UPDATE Manager
                         SET SchoolID = NULL
-                        WHERE ManagerID = ?
-                          AND SchoolID = ?
-                        """, managerID, schoolID);
+                        WHERE SchoolID = ?
+                        """, schoolID);
 
                 // Delete the school last.
                 int deletedSchools = executeUpdate(connection, """
@@ -338,7 +342,11 @@ public class SchoolRepository {
                 return true;
 
             } catch (SQLException | RuntimeException exception) {
-                connection.rollback();
+                try {
+                    connection.rollback();
+                } catch (SQLException rollbackException) {
+                    exception.addSuppressed(rollbackException);
+                }
                 throw exception;
             } finally {
                 connection.setAutoCommit(true);
