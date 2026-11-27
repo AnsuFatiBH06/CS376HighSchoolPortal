@@ -1,3 +1,4 @@
+
 package com.highschoolportal.repository;
 
 import com.highschoolportal.database.MySQLConnect;
@@ -58,8 +59,8 @@ public class AcademicYearRepository {
                 INSERT INTO AcademicYear
                 (SchoolID, Name, StartDate, EndDate,
                  MinOptionalSubjects, MaxOptionalSubjects,
-                 RequiredPassedSubjects, ExamPeriodOpen)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                 RequiredPassedSubjects, ExamPeriodOpen, IsEnded)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         try (Connection connection = MySQLConnect.getInstance().getConnection();
@@ -74,6 +75,7 @@ public class AcademicYearRepository {
             statement.setInt(6, academicYear.getMaxOptionalSubjects());
             statement.setInt(7, academicYear.getRequiredPassedSubjects());
             statement.setBoolean(8, false);
+            statement.setBoolean(9, false);
 
             statement.executeUpdate();
 
@@ -93,6 +95,7 @@ public class AcademicYearRepository {
                         academicYear.getMinOptionalSubjects(),
                         academicYear.getMaxOptionalSubjects(),
                         academicYear.getRequiredPassedSubjects(),
+                        false,
                         false
                 );
             }
@@ -104,7 +107,7 @@ public class AcademicYearRepository {
         String sql = """
                 SELECT AcademicYearID, SchoolID, Name, StartDate, EndDate,
                        MinOptionalSubjects, MaxOptionalSubjects,
-                       RequiredPassedSubjects, ExamPeriodOpen
+                       RequiredPassedSubjects, ExamPeriodOpen, IsEnded
                 FROM AcademicYear
                 WHERE SchoolID = ?
                 ORDER BY StartDate DESC, AcademicYearID DESC
@@ -133,7 +136,7 @@ public class AcademicYearRepository {
         String sql = """
                 SELECT AcademicYearID, SchoolID, Name, StartDate, EndDate,
                        MinOptionalSubjects, MaxOptionalSubjects,
-                       RequiredPassedSubjects, ExamPeriodOpen
+                       RequiredPassedSubjects, ExamPeriodOpen, IsEnded
                 FROM AcademicYear
                 WHERE AcademicYearID = ? AND SchoolID = ?
                 """;
@@ -149,6 +152,30 @@ public class AcademicYearRepository {
                         ? Optional.of(mapRow(result))
                         : Optional.empty();
             }
+        }
+    }
+
+    // Ends an academic year if it belongs to the school,
+    // is not already ended, and its exam period is closed.
+    public boolean endAcademicYear(int academicYearID, int schoolID)
+            throws SQLException {
+
+        String sql = """
+                UPDATE AcademicYear
+                SET IsEnded = TRUE
+                WHERE AcademicYearID = ?
+                  AND SchoolID = ?
+                  AND IsEnded = FALSE
+                  AND ExamPeriodOpen = FALSE
+                """;
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, academicYearID);
+            statement.setInt(2, schoolID);
+
+            return statement.executeUpdate() == 1;
         }
     }
 
@@ -199,7 +226,9 @@ public class AcademicYearRepository {
                 SET MinOptionalSubjects = ?,
                     MaxOptionalSubjects = ?,
                     RequiredPassedSubjects = ?
-                WHERE AcademicYearID = ? AND SchoolID = ?
+                WHERE AcademicYearID = ?
+                  AND SchoolID = ?
+                  AND IsEnded = FALSE
                 """;
 
         try (Connection connection = MySQLConnect.getInstance().getConnection();
@@ -235,7 +264,8 @@ public class AcademicYearRepository {
                 result.getInt("MinOptionalSubjects"),
                 result.getInt("MaxOptionalSubjects"),
                 result.getInt("RequiredPassedSubjects"),
-                result.getBoolean("ExamPeriodOpen")
+                result.getBoolean("ExamPeriodOpen"),
+                result.getBoolean("IsEnded")
         );
     }
 }
