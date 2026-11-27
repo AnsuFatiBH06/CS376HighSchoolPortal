@@ -786,7 +786,7 @@ public class StudentManagementService {
 
         return academicYears;
     }
-    
+
     // Returns the qualification status for a student.
     // The student can only access their own academic-year enrolment.
     public String getQualificationStatusForStudent(
@@ -985,6 +985,52 @@ public class StudentManagementService {
 
             return qualificationStatus;
         }
+    }
+
+    // Returns academic years for a student belonging to the Manager's school.
+    public Map<Integer, String> getStudentAcademicYearsForManager(
+            int managerID,
+            int studentID) throws SQLException {
+
+        if (managerID <= 0 || studentID <= 0) {
+            throw new IllegalArgumentException(
+                    "A valid Manager and student are required."
+            );
+        }
+
+        int schoolID = findManagerSchoolID(managerID);
+
+        String sql = """
+                SELECT ay.AcademicYearID, ay.Name
+                FROM StudentAcademicYear say
+                JOIN AcademicYear ay
+                    ON ay.AcademicYearID = say.AcademicYearID
+                JOIN Student student
+                    ON student.StudentID = say.StudentID
+                WHERE say.StudentID = ?
+                  AND student.SchoolID = ?
+                ORDER BY ay.StartDate DESC
+                """;
+
+        Map<Integer, String> academicYears = new LinkedHashMap<>();
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, studentID);
+            statement.setInt(2, schoolID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    academicYears.put(
+                            result.getInt("AcademicYearID"),
+                            result.getString("Name")
+                    );
+                }
+            }
+        }
+
+        return academicYears;
     }
 
 }
