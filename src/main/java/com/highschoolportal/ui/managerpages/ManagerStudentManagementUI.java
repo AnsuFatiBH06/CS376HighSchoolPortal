@@ -25,22 +25,19 @@ import com.highschoolportal.services.StudentManagementService;
 public class ManagerStudentManagementUI extends JPanel {
 
     private final App app;
-    private final StudentManagementService service =
-            new StudentManagementService();
+    private final StudentManagementService service = new StudentManagementService();
 
     private final JComboBox<String> subjectCodeBox = new JComboBox<>();
-    private final JComboBox<String> certificateStatusBox =
-            new JComboBox<>(
-                    new String[]{"All", "Qualified", "Unqualified",
-                        "Results Processing"});
+    private final JComboBox<String> certificateStatusBox = new JComboBox<>(
+            new String[] { "All", "Qualified", "Unqualified",
+                    "Results Processing" });
 
-    private final JCheckBox incompleteCurriculumBox =
-            new JCheckBox("Incomplete curriculum only");
+    private final JCheckBox incompleteCurriculumBox = new JCheckBox("Incomplete curriculum only");
 
     private final DefaultTableModel model = new DefaultTableModel(
-            new Object[]{
-                "Student ID", "Student Name", "Email",
-                "Academic Year", "Certificate Status"
+            new Object[] {
+                    "Student ID", "Student Name", "Email",
+                    "Academic Year", "Certificate Status"
             }, 0) {
 
         @Override
@@ -95,8 +92,7 @@ public class ManagerStudentManagementUI extends JPanel {
 
         JButton refreshButton = new JButton("Refresh Subjects");
         JButton notifyButton = new JButton("Notify Selected Student");
-        JButton qualificationButton =
-                new JButton("View Qualification Status");
+        JButton qualificationButton = new JButton("View Qualification Status");
 
         actions.add(refreshButton);
         actions.add(notifyButton);
@@ -109,16 +105,14 @@ public class ManagerStudentManagementUI extends JPanel {
         refreshButton.addActionListener(event -> loadSubjectCodes());
         notifyButton.addActionListener(event -> notifySelectedStudent());
         qualificationButton.addActionListener(
-                event -> viewQualificationStatus()
-        );
+                event -> viewQualificationStatus());
 
         addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override
             public void componentShown(
                     java.awt.event.ComponentEvent event) {
 
-                if (app.getCurrentUser()
-                        instanceof com.highschoolportal.model.Manager) {
+                if (app.getCurrentUser() instanceof com.highschoolportal.model.Manager) {
 
                     model.setRowCount(0);
                     certificateStatusBox.setSelectedIndex(0);
@@ -159,8 +153,7 @@ public class ManagerStudentManagementUI extends JPanel {
                     this,
                     exception.getMessage(),
                     "Load Subjects",
-                    JOptionPane.ERROR_MESSAGE
-            );
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -170,16 +163,15 @@ public class ManagerStudentManagementUI extends JPanel {
 
             model.setRowCount(0);
 
-            List<StudentSummary> students =
-                    service.getAllStudents(managerID);
+            List<StudentSummary> students = service.getAllStudents(managerID);
 
             for (StudentSummary student : students) {
-                model.addRow(new Object[]{
-                    student.getStudentID(),
-                    student.getStudentName(),
-                    student.getEmail(),
-                    student.getAcademicYearName(),
-                    student.getCertificateStatus()
+                model.addRow(new Object[] {
+                        student.getStudentID(),
+                        student.getStudentName(),
+                        student.getEmail(),
+                        student.getAcademicYearName(),
+                        student.getCertificateStatus()
                 });
             }
 
@@ -188,8 +180,7 @@ public class ManagerStudentManagementUI extends JPanel {
                         this,
                         "No students were found in your school.",
                         "Student Management",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                        JOptionPane.INFORMATION_MESSAGE);
             }
 
         } catch (Exception exception) {
@@ -197,8 +188,7 @@ public class ManagerStudentManagementUI extends JPanel {
                     this,
                     exception.getMessage(),
                     "Student Management",
-                    JOptionPane.ERROR_MESSAGE
-            );
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -206,37 +196,32 @@ public class ManagerStudentManagementUI extends JPanel {
         try {
             int managerID = app.getCurrentUser().getUserID();
 
-            String selectedSubjectCode =
-                    (String) subjectCodeBox.getSelectedItem();
+            String selectedSubjectCode = (String) subjectCodeBox.getSelectedItem();
 
-            String selectedCertificateStatus =
-                    (String) certificateStatusBox.getSelectedItem();
+            String selectedCertificateStatus = (String) certificateStatusBox.getSelectedItem();
 
             String subjectCode = "All".equals(selectedSubjectCode)
                     ? ""
                     : selectedSubjectCode;
 
-            String certificateStatus =
-                    "All".equals(selectedCertificateStatus)
-                            ? ""
-                            : selectedCertificateStatus;
+            String certificateStatus = "All".equals(selectedCertificateStatus)
+                    ? ""
+                    : selectedCertificateStatus;
 
             model.setRowCount(0);
 
             if (incompleteCurriculumBox.isSelected()) {
-                List<IncompleteCurriculumStudent> students =
-                        service.getStudentsWithIncompleteCurricula(
-                                managerID
-                        );
+                List<IncompleteCurriculumStudent> students = service.getStudentsWithIncompleteCurricula(
+                        managerID);
 
                 for (IncompleteCurriculumStudent student : students) {
-                    model.addRow(new Object[]{
-                        student.getStudentID(),
-                        student.getStudentName(),
-                        student.getEmail(),
-                        student.getAcademicYearName(),
-                        student.getOptionalSubjectsSelected() + " / "
-                        + student.getMinimumOptionalSubjects()
+                    model.addRow(new Object[] {
+                            student.getStudentID(),
+                            student.getStudentName(),
+                            student.getEmail(),
+                            student.getAcademicYearName(),
+                            student.getOptionalSubjectsSelected() + " / "
+                                    + student.getMinimumOptionalSubjects()
                     });
                 }
 
@@ -245,27 +230,24 @@ public class ManagerStudentManagementUI extends JPanel {
                             this,
                             "All students have complete curricula.",
                             "Student Management",
-                            JOptionPane.INFORMATION_MESSAGE
-                    );
+                            JOptionPane.INFORMATION_MESSAGE);
                 }
 
                 return;
             }
 
-            List<StudentSummary> students =
-                    service.filterStudents(
-                            managerID,
-                            subjectCode,
-                            certificateStatus
-                    );
+            List<StudentSummary> students = service.filterStudents(
+                    managerID,
+                    subjectCode,
+                    certificateStatus);
 
             for (StudentSummary student : students) {
-                model.addRow(new Object[]{
-                    student.getStudentID(),
-                    student.getStudentName(),
-                    student.getEmail(),
-                    student.getAcademicYearName(),
-                    student.getCertificateStatus()
+                model.addRow(new Object[] {
+                        student.getStudentID(),
+                        student.getStudentName(),
+                        student.getEmail(),
+                        student.getAcademicYearName(),
+                        student.getCertificateStatus()
                 });
             }
 
@@ -274,8 +256,7 @@ public class ManagerStudentManagementUI extends JPanel {
                         this,
                         "No students were found for the selected filters.",
                         "Student Management",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                        JOptionPane.INFORMATION_MESSAGE);
             }
 
         } catch (Exception exception) {
@@ -283,8 +264,7 @@ public class ManagerStudentManagementUI extends JPanel {
                     this,
                     exception.getMessage(),
                     "Student Management",
-                    JOptionPane.ERROR_MESSAGE
-            );
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -304,8 +284,7 @@ public class ManagerStudentManagementUI extends JPanel {
                     this,
                     "Select a student first.",
                     "Notify Student",
-                    JOptionPane.WARNING_MESSAGE
-            );
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
@@ -313,8 +292,7 @@ public class ManagerStudentManagementUI extends JPanel {
                 this,
                 "Enter the notification message:",
                 "Notify Student",
-                JOptionPane.QUESTION_MESSAGE
-        );
+                JOptionPane.QUESTION_MESSAGE);
 
         if (message == null || message.isBlank()) {
             return;
@@ -327,16 +305,14 @@ public class ManagerStudentManagementUI extends JPanel {
 
             JOptionPane.showMessageDialog(
                     this,
-                    "Notification sent successfully."
-            );
+                    "Notification sent successfully.");
 
         } catch (Exception exception) {
             JOptionPane.showMessageDialog(
                     this,
                     exception.getMessage(),
                     "Notify Student",
-                    JOptionPane.ERROR_MESSAGE
-            );
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
@@ -348,38 +324,33 @@ public class ManagerStudentManagementUI extends JPanel {
                     this,
                     "Select a student first.",
                     "Qualification Status",
-                    JOptionPane.WARNING_MESSAGE
-            );
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
             int managerID = app.getCurrentUser().getUserID();
 
-            Map<Integer, String> academicYears =
-                    service.getStudentAcademicYears(studentID);
-
+            Map<Integer, String> academicYears = service.getStudentAcademicYearsForManager(
+                    managerID,
+                    studentID);
             if (academicYears.isEmpty()) {
                 JOptionPane.showMessageDialog(
                         this,
                         "No academic years were found for this student.",
                         "Qualification Status",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
+                        JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
 
             JComboBox<AcademicYearOption> yearBox = new JComboBox<>();
 
-            for (Map.Entry<Integer, String> entry
-                    : academicYears.entrySet()) {
+            for (Map.Entry<Integer, String> entry : academicYears.entrySet()) {
 
                 yearBox.addItem(
                         new AcademicYearOption(
                                 entry.getKey(),
-                                entry.getValue()
-                        )
-                );
+                                entry.getValue()));
             }
 
             int choice = JOptionPane.showConfirmDialog(
@@ -387,41 +358,35 @@ public class ManagerStudentManagementUI extends JPanel {
                     yearBox,
                     "Select Academic Year",
                     JOptionPane.OK_CANCEL_OPTION,
-                    JOptionPane.QUESTION_MESSAGE
-            );
+                    JOptionPane.QUESTION_MESSAGE);
 
             if (choice != JOptionPane.OK_OPTION) {
                 return;
             }
 
-            AcademicYearOption selectedYear =
-                    (AcademicYearOption) yearBox.getSelectedItem();
+            AcademicYearOption selectedYear = (AcademicYearOption) yearBox.getSelectedItem();
 
             if (selectedYear == null) {
                 return;
             }
 
-            String status =
-                    service.getQualificationStatusForManager(
-                            managerID,
-                            studentID,
-                            selectedYear.getAcademicYearID()
-                    );
+            String status = service.getQualificationStatusForManager(
+                    managerID,
+                    studentID,
+                    selectedYear.getAcademicYearID());
 
             JOptionPane.showMessageDialog(
                     this,
                     "Qualification Status: " + status,
                     "Student Qualification Status",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+                    JOptionPane.INFORMATION_MESSAGE);
 
         } catch (Exception exception) {
             JOptionPane.showMessageDialog(
                     this,
                     exception.getMessage(),
                     "Qualification Status",
-                    JOptionPane.ERROR_MESSAGE
-            );
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
