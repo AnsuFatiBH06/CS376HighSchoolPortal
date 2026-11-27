@@ -10,13 +10,15 @@ public class Manager extends User {
     private SuperManagerStatus superManagerStatus;
     private int schoolID;
 
-    public Manager(int userID, String fName, String lName, String email, int credentialsID, SuperManagerStatus superManagerStatus) {
+    public Manager(int userID, String fName, String lName, String email, int credentialsID,
+            SuperManagerStatus superManagerStatus) {
         super(userID, fName, lName, email, credentialsID);
         this.superManagerStatus = superManagerStatus;
         this.schoolID = -1;
     } // still doesnt belong to a school
 
-    public Manager(int userID, String fName, String lName, String email, int credentialsID, SuperManagerStatus superManagerStatus, int schoolID) {
+    public Manager(int userID, String fName, String lName, String email, int credentialsID,
+            SuperManagerStatus superManagerStatus, int schoolID) {
         super(userID, fName, lName, email, credentialsID);
         this.superManagerStatus = superManagerStatus;
         this.schoolID = schoolID;
@@ -24,6 +26,10 @@ public class Manager extends User {
 
     public int getSchoolID() {
         return this.schoolID;
+    }
+
+    public void setSchoolID(int schoolID) {
+        this.schoolID = schoolID;
     }
 
     public SuperManagerStatus getSuperManagerStatus() {

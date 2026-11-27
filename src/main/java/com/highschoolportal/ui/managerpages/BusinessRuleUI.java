@@ -1,3 +1,4 @@
+
 package com.highschoolportal.ui.managerpages;
 
 import com.highschoolportal.app.App;
@@ -37,14 +38,15 @@ public class BusinessRuleUI extends JPanel {
     private final JTextField requiredPassedField = new JTextField("1", 18);
 
     private final DefaultTableModel tableModel = new DefaultTableModel(
-            new Object[]{
+            new Object[] {
                     "ID",
                     "Name",
                     "Start date",
                     "End date",
                     "Min optional",
                     "Max optional",
-                    "Required passed"
+                    "Required passed",
+                    "Ended"
             }, 0) {
 
         @Override
@@ -56,6 +58,8 @@ public class BusinessRuleUI extends JPanel {
     private final JTable academicYearsTable = new JTable(tableModel);
 
     private int selectedAcademicYearID = -1;
+    private JButton updateButton;
+    private JButton endButton;
 
     public BusinessRuleUI(App app) {
         this(app, new BusinessRuleService());
@@ -83,8 +87,7 @@ public class BusinessRuleUI extends JPanel {
         JPanel form = new JPanel(new GridBagLayout());
 
         form.setBorder(BorderFactory.createTitledBorder(
-                "Academic year details and business rules"
-        ));
+                "Academic year details and business rules"));
 
         GridBagConstraints constraints = new GridBagConstraints();
 
@@ -100,8 +103,7 @@ public class BusinessRuleUI extends JPanel {
         addField(form, constraints, 5, "Required passed subjects", requiredPassedField);
 
         JLabel note = new JLabel(
-                "Rules are saved separately for each academic year."
-        );
+                "Rules are saved separately for each academic year.");
 
         constraints.gridx = 0;
         constraints.gridy = 6;
@@ -110,13 +112,15 @@ public class BusinessRuleUI extends JPanel {
         form.add(note, constraints);
 
         JButton createButton = new JButton("Create Academic Year");
-        JButton updateButton = new JButton("Update Selected Year's Rules");
+        updateButton = new JButton("Update Selected Year's Rules");
+        endButton = new JButton("End Selected Academic Year");
         JButton clearButton = new JButton("Clear Selection");
 
         JPanel actions = new JPanel();
 
         actions.add(createButton);
         actions.add(updateButton);
+        actions.add(endButton);
         actions.add(clearButton);
 
         JPanel formContainer = new JPanel(new BorderLayout(5, 8));
@@ -125,16 +129,14 @@ public class BusinessRuleUI extends JPanel {
         formContainer.add(actions, BorderLayout.SOUTH);
 
         academicYearsTable.setSelectionMode(
-                ListSelectionModel.SINGLE_SELECTION
-        );
+                ListSelectionModel.SINGLE_SELECTION);
 
         academicYearsTable.setAutoCreateRowSorter(true);
 
         JScrollPane tableScroll = new JScrollPane(academicYearsTable);
 
         tableScroll.setBorder(BorderFactory.createTitledBorder(
-                "Academic years for your school"
-        ));
+                "Academic years for your school"));
 
         content.add(formContainer, BorderLayout.NORTH);
         content.add(tableScroll, BorderLayout.CENTER);
@@ -151,6 +153,7 @@ public class BusinessRuleUI extends JPanel {
 
         createButton.addActionListener(event -> createAcademicYear());
         updateButton.addActionListener(event -> updateSelectedRules());
+        endButton.addActionListener(event -> endSelectedAcademicYear());
         clearButton.addActionListener(event -> clearForm());
         backButton.addActionListener(event -> app.goBack());
 
@@ -185,29 +188,23 @@ public class BusinessRuleUI extends JPanel {
 
         if (manager == null) {
             showError(
-                    "There is no manager session. Please sign in as a school manager."
-            );
+                    "There is no manager session. Please sign in as a school manager.");
             return;
         }
 
         try {
-            LocalDate startDate =
-                    LocalDate.parse(startDateField.getText().trim());
+            LocalDate startDate = LocalDate.parse(startDateField.getText().trim());
 
-            LocalDate endDate =
-                    LocalDate.parse(endDateField.getText().trim());
+            LocalDate endDate = LocalDate.parse(endDateField.getText().trim());
 
             int minOptional = parseInteger(
-                    minOptionalField, "Minimum optional subjects"
-            );
+                    minOptionalField, "Minimum optional subjects");
 
             int maxOptional = parseInteger(
-                    maxOptionalField, "Maximum optional subjects"
-            );
+                    maxOptionalField, "Maximum optional subjects");
 
             int requiredPassed = parseInteger(
-                    requiredPassedField, "Required passed subjects"
-            );
+                    requiredPassedField, "Required passed subjects");
 
             AcademicYear created = businessRuleService.createAcademicYear(
                     manager,
@@ -216,16 +213,14 @@ public class BusinessRuleUI extends JPanel {
                     endDate,
                     minOptional,
                     maxOptional,
-                    requiredPassed
-            );
+                    requiredPassed);
 
             JOptionPane.showMessageDialog(
                     this,
                     "Academic year '" + created.getName()
                             + "' was created successfully.",
                     "Academic year created",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+                    JOptionPane.INFORMATION_MESSAGE);
 
             clearForm();
             refreshAcademicYears();
@@ -233,8 +228,7 @@ public class BusinessRuleUI extends JPanel {
         } catch (DateTimeParseException exception) {
 
             showError(
-                    "Enter dates in YYYY-MM-DD format, for example 2026-09-01."
-            );
+                    "Enter dates in YYYY-MM-DD format, for example 2026-09-01.");
 
         } catch (NumberFormatException exception) {
 
@@ -256,8 +250,7 @@ public class BusinessRuleUI extends JPanel {
 
         if (manager == null) {
             showError(
-                    "There is no manager session. Please sign in as a school manager."
-            );
+                    "There is no manager session. Please sign in as a school manager.");
             return;
         }
 
@@ -268,37 +261,83 @@ public class BusinessRuleUI extends JPanel {
 
         try {
             int minOptional = parseInteger(
-                    minOptionalField, "Minimum optional subjects"
-            );
+                    minOptionalField, "Minimum optional subjects");
 
             int maxOptional = parseInteger(
-                    maxOptionalField, "Maximum optional subjects"
-            );
+                    maxOptionalField, "Maximum optional subjects");
 
             int requiredPassed = parseInteger(
-                    requiredPassedField, "Required passed subjects"
-            );
+                    requiredPassedField, "Required passed subjects");
 
             businessRuleService.updateRules(
                     manager,
                     selectedAcademicYearID,
                     minOptional,
                     maxOptional,
-                    requiredPassed
-            );
+                    requiredPassed);
 
             JOptionPane.showMessageDialog(
                     this,
                     "Academic-year rules updated successfully.",
                     "Rules updated",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
+                    JOptionPane.INFORMATION_MESSAGE);
 
             refreshAcademicYears();
 
         } catch (NumberFormatException exception) {
 
             showError(exception.getMessage());
+
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+
+            showError(exception.getMessage());
+
+        } catch (SQLException exception) {
+
+            showError(databaseErrorMessage(exception));
+        }
+    }
+
+    private void endSelectedAcademicYear() {
+
+        Manager manager = (Manager) app.getCurrentUser();
+
+        if (manager == null) {
+            showError(
+                    "There is no manager session. Please sign in as a school manager.");
+            return;
+        }
+
+        if (selectedAcademicYearID <= 0) {
+            showError("Select an academic year from the table first.");
+            return;
+        }
+
+        int choice = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to end this academic year?\n\n"
+                        + "This action cannot be undone.",
+                "Confirm academic year completion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
+        if (choice != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try {
+            businessRuleService.endAcademicYear(
+                    manager,
+                    selectedAcademicYearID);
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "The academic year was ended successfully.",
+                    "Academic year ended",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            clearForm();
+            refreshAcademicYears();
 
         } catch (IllegalArgumentException | IllegalStateException exception) {
 
@@ -318,8 +357,7 @@ public class BusinessRuleUI extends JPanel {
         } catch (NumberFormatException exception) {
 
             throw new NumberFormatException(
-                    fieldName + " must be a whole number."
-            );
+                    fieldName + " must be a whole number.");
         }
     }
 
@@ -334,18 +372,18 @@ public class BusinessRuleUI extends JPanel {
         }
 
         try {
-            List<AcademicYear> years =
-                    businessRuleService.getAcademicYears(manager);
+            List<AcademicYear> years = businessRuleService.getAcademicYears(manager);
 
             for (AcademicYear year : years) {
-                tableModel.addRow(new Object[]{
+                tableModel.addRow(new Object[] {
                         year.getAcademicYearID(),
                         year.getName(),
                         year.getStartDate(),
                         year.getEndDate(),
                         year.getMinOptionalSubjects(),
                         year.getMaxOptionalSubjects(),
-                        year.getRequiredPassedSubjects()
+                        year.getRequiredPassedSubjects(),
+                        year.isEnded() ? "Yes" : "No"
                 });
             }
 
@@ -365,32 +403,29 @@ public class BusinessRuleUI extends JPanel {
 
         int row = academicYearsTable.convertRowIndexToModel(viewRow);
 
-        selectedAcademicYearID =
-                (int) tableModel.getValueAt(row, 0);
+        selectedAcademicYearID = (int) tableModel.getValueAt(row, 0);
+        boolean ended = "Yes".equals(
+                tableModel.getValueAt(row, 7));
 
+        updateButton.setEnabled(!ended);
+        endButton.setEnabled(!ended);
         nameField.setText(
-                String.valueOf(tableModel.getValueAt(row, 1))
-        );
+                String.valueOf(tableModel.getValueAt(row, 1)));
 
         startDateField.setText(
-                String.valueOf(tableModel.getValueAt(row, 2))
-        );
+                String.valueOf(tableModel.getValueAt(row, 2)));
 
         endDateField.setText(
-                String.valueOf(tableModel.getValueAt(row, 3))
-        );
+                String.valueOf(tableModel.getValueAt(row, 3)));
 
         minOptionalField.setText(
-                String.valueOf(tableModel.getValueAt(row, 4))
-        );
+                String.valueOf(tableModel.getValueAt(row, 4)));
 
         maxOptionalField.setText(
-                String.valueOf(tableModel.getValueAt(row, 5))
-        );
+                String.valueOf(tableModel.getValueAt(row, 5)));
 
         requiredPassedField.setText(
-                String.valueOf(tableModel.getValueAt(row, 6))
-        );
+                String.valueOf(tableModel.getValueAt(row, 6)));
     }
 
     private void clearForm() {
@@ -406,6 +441,9 @@ public class BusinessRuleUI extends JPanel {
         minOptionalField.setText("0");
         maxOptionalField.setText("0");
         requiredPassedField.setText("1");
+        
+        updateButton.setEnabled(false);
+        endButton.setEnabled(false);
     }
 
     private void showError(String message) {
@@ -414,8 +452,7 @@ public class BusinessRuleUI extends JPanel {
                 this,
                 message,
                 "Academic year",
-                JOptionPane.ERROR_MESSAGE
-        );
+                JOptionPane.ERROR_MESSAGE);
     }
 
     private String databaseErrorMessage(Exception exception) {
@@ -424,19 +461,18 @@ public class BusinessRuleUI extends JPanel {
 
         if (message != null
                 && (message.contains("Unknown column")
-                || message.contains("doesn't exist"))) {
+                        || message.contains("doesn't exist"))) {
 
-            return "The database schema is missing the academic-year date columns. "
-                    + "Run the migration in "
-                    + "src/main/resources/db/migration/"
-                    + "V1_4__academic_year_dates_and_unique_name.sql "
-                    + "and try again.";
+            return "The database schema may be missing required academic-year "
+                    + "columns. Check that the academic-year migrations have "
+                    + "been applied before using this feature.\n"
+                    + message;
         }
 
         return "The academic-year operation could not be completed. "
                 + "Check the database connection and schema.\n"
                 + (message == null
-                ? exception.getClass().getSimpleName()
-                : message);
+                        ? exception.getClass().getSimpleName()
+                        : message);
     }
 }
