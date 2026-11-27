@@ -1,3 +1,4 @@
+
 package com.highschoolportal.services;
 
 import com.highschoolportal.model.AcademicYear;
@@ -136,6 +137,56 @@ public class BusinessRuleService {
         validateManager(manager);
 
         return academicYearRepository.findBySchoolID(manager.getSchoolID());
+    }
+
+    public void endAcademicYear(
+            Manager manager,
+            int academicYearID) throws SQLException {
+
+        validateManager(manager);
+
+        if (academicYearID <= 0) {
+            throw new IllegalArgumentException(
+                    "Select an academic year first."
+            );
+        }
+
+        if (!academicYearRepository.isSchoolApproved(manager.getSchoolID())) {
+            throw new IllegalStateException(
+                    "Only managers of an approved school can end academic years."
+            );
+        }
+
+        AcademicYear academicYear = academicYearRepository
+                .findByIDAndSchoolID(
+                        academicYearID,
+                        manager.getSchoolID()
+                )
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "The selected academic year does not belong to your school."
+                ));
+
+        if (academicYear.isEnded()) {
+            throw new IllegalStateException(
+                    "This academic year has already ended."
+            );
+        }
+
+        if (academicYear.isExamPeriodOpen()) {
+            throw new IllegalStateException(
+                    "The academic year cannot end while its exam period is open."
+            );
+        }
+
+        if (!academicYearRepository.endAcademicYear(
+                academicYearID,
+                manager.getSchoolID())) {
+
+            throw new SQLException(
+                    "The academic year could not be ended. "
+                            + "It may have already ended or its exam period may be open."
+            );
+        }
     }
 
     public void updateRules(
