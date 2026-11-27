@@ -1,3 +1,4 @@
+
 package com.highschoolportal.ui.managerpages;
 
 import com.highschoolportal.app.App;
@@ -44,7 +45,8 @@ public class BusinessRuleUI extends JPanel {
                     "End date",
                     "Min optional",
                     "Max optional",
-                    "Required passed"
+                    "Required passed",
+                    "Ended"
             }, 0) {
 
         @Override
@@ -111,12 +113,14 @@ public class BusinessRuleUI extends JPanel {
 
         JButton createButton = new JButton("Create Academic Year");
         JButton updateButton = new JButton("Update Selected Year's Rules");
+        JButton endButton = new JButton("End Selected Academic Year");
         JButton clearButton = new JButton("Clear Selection");
 
         JPanel actions = new JPanel();
 
         actions.add(createButton);
         actions.add(updateButton);
+        actions.add(endButton);
         actions.add(clearButton);
 
         JPanel formContainer = new JPanel(new BorderLayout(5, 8));
@@ -151,6 +155,7 @@ public class BusinessRuleUI extends JPanel {
 
         createButton.addActionListener(event -> createAcademicYear());
         updateButton.addActionListener(event -> updateSelectedRules());
+        endButton.addActionListener(event -> endSelectedAcademicYear());
         clearButton.addActionListener(event -> clearForm());
         backButton.addActionListener(event -> app.goBack());
 
@@ -310,6 +315,61 @@ public class BusinessRuleUI extends JPanel {
         }
     }
 
+    private void endSelectedAcademicYear() {
+
+        Manager manager = (Manager) app.getCurrentUser();
+
+        if (manager == null) {
+            showError(
+                    "There is no manager session. Please sign in as a school manager."
+            );
+            return;
+        }
+
+        if (selectedAcademicYearID <= 0) {
+            showError("Select an academic year from the table first.");
+            return;
+        }
+
+        int choice = JOptionPane.showConfirmDialog(
+                this,
+                "Are you sure you want to end this academic year?\n\n"
+                        + "This action cannot be undone.",
+                "Confirm academic year completion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+        );
+
+        if (choice != JOptionPane.YES_OPTION) {
+            return;
+        }
+
+        try {
+            businessRuleService.endAcademicYear(
+                    manager,
+                    selectedAcademicYearID
+            );
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "The academic year was ended successfully.",
+                    "Academic year ended",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+
+            clearForm();
+            refreshAcademicYears();
+
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+
+            showError(exception.getMessage());
+
+        } catch (SQLException exception) {
+
+            showError(databaseErrorMessage(exception));
+        }
+    }
+
     private int parseInteger(JTextField field, String fieldName) {
 
         try {
@@ -345,7 +405,8 @@ public class BusinessRuleUI extends JPanel {
                         year.getEndDate(),
                         year.getMinOptionalSubjects(),
                         year.getMaxOptionalSubjects(),
-                        year.getRequiredPassedSubjects()
+                        year.getRequiredPassedSubjects(),
+                        year.isEnded() ? "Yes" : "No"
                 });
             }
 
@@ -426,11 +487,10 @@ public class BusinessRuleUI extends JPanel {
                 && (message.contains("Unknown column")
                 || message.contains("doesn't exist"))) {
 
-            return "The database schema is missing the academic-year date columns. "
-                    + "Run the migration in "
-                    + "src/main/resources/db/migration/"
-                    + "V1_4__academic_year_dates_and_unique_name.sql "
-                    + "and try again.";
+            return "The database schema may be missing required academic-year "
+                    + "columns. Check that the academic-year migrations have "
+                    + "been applied before using this feature.\n"
+                    + message;
         }
 
         return "The academic-year operation could not be completed. "

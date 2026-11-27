@@ -744,4 +744,205 @@ public class StudentManagementService {
 
     return subjectCodes;
 }
+
+    // Returns the qualification status for a student.
+    // The student can only access their own academic-year enrolment.
+    public String getQualificationStatusForStudent(
+            int studentID,
+            int academicYearID) throws SQLException {
+
+        if (studentID <= 0 || academicYearID <= 0) {
+            throw new IllegalArgumentException(
+                    "A valid student and academic year are required."
+            );
+        }
+
+        return calculateAndSaveQualificationStatus(
+                studentID,
+                academicYearID,
+                null
+        );
+    }
+
+    // Returns the qualification status for a student belonging to the Manager's school.
+    public String getQualificationStatusForManager(
+            int managerID,
+            int studentID,
+            int academicYearID) throws SQLException {
+
+        if (managerID <= 0 || studentID <= 0 || academicYearID <= 0) {
+            throw new IllegalArgumentException(
+                    "A valid Manager, student and academic year are required."
+            );
+        }
+
+        int schoolID = findManagerSchoolID(managerID);
+
+        return calculateAndSaveQualificationStatus(
+                studentID,
+                academicYearID,
+                schoolID
+        );
+    }
+
+    // Calculates the qualification status and saves it in StudentAcademicYear.
+    // A schoolID of null means the request is being made by the student.
+    private String calculateAndSaveQualificationStatus(
+            int studentID,
+            int academicYearID,
+            Integer schoolID) throws SQLException {
+
+        String sql = """
+                SELECT
+                    say.StudentAcademicYearID,
+                    ay.MinOptionalSubjects,
+                    ay.RequiredPassedSubjects,
+
+                    COUNT(d.SubjectAcademicYearID) AS AssignedSubjects,
+
+                    SUM(
+                        CASE
+                            WHEN d.SubjectAcademicYearID IS NOT NULL
+                                 AND (
+                                     d.FinalMark IS NULL
+                                     OR d.ResultStatus = 'Incomplete'
+                                 )
+                            THEN 1
+                            ELSE 0
+                        END
+                    ) AS IncompleteResults,
+
+                    SUM(
+                        CASE
+                            WHEN d.FinalMark >= subject.PassMark
+                            THEN 1
+                            ELSE 0
+                        END
+                    ) AS PassedSubjects,
+
+                    SUM(
+                        CASE
+                            WHEN d.SubjectAcademicYearID IS NOT NULL
+                                 AND subjectYear.IsCore = FALSE
+                            THEN 1
+                            ELSE 0
+                        END
+                    ) AS OptionalSubjects
+
+                FROM StudentAcademicYear say
+
+                JOIN Student student
+                    ON student.StudentID = say.StudentID
+
+                JOIN AcademicYear ay
+                    ON ay.AcademicYearID = say.AcademicYearID
+
+                LEFT JOIN Details d
+                    ON d.StudentAcademicYearID = say.StudentAcademicYearID
+
+                LEFT JOIN SubjectAcademicYear subjectYear
+                    ON subjectYear.SubjectAcademicYearID =
+                       d.SubjectAcademicYearID
+
+                LEFT JOIN Subject subject
+                    ON subject.SubjectID = subjectYear.SubjectID
+
+                WHERE say.StudentID = ?
+                  AND say.AcademicYearID = ?
+                  AND (? IS NULL OR student.SchoolID = ?)
+
+                GROUP BY
+                    say.StudentAcademicYearID,
+                    ay.MinOptionalSubjects,
+                    ay.RequiredPassedSubjects
+                """;
+
+        int studentAcademicYearID;
+        int minimumOptionalSubjects;
+        int requiredPassedSubjects;
+        int assignedSubjects;
+        int incompleteResults;
+        int passedSubjects;
+        int optionalSubjects;
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, studentID);
+            statement.setInt(2, academicYearID);
+
+            if (schoolID == null) {
+                statement.setNull(3, java.sql.Types.INTEGER);
+                statement.setNull(4, java.sql.Types.INTEGER);
+            } else {
+                statement.setInt(3, schoolID);
+                statement.setInt(4, schoolID);
+            }
+
+            try (ResultSet result = statement.executeQuery()) {
+
+                if (!result.next()) {
+                    throw new IllegalArgumentException(
+                            "The student is not enrolled in the selected academic year "
+                                    + "or the academic year does not belong to your school."
+                    );
+                }
+
+                studentAcademicYearID =
+                        result.getInt("StudentAcademicYearID");
+
+                minimumOptionalSubjects =
+                        result.getInt("MinOptionalSubjects");
+
+                requiredPassedSubjects =
+                        result.getInt("RequiredPassedSubjects");
+
+                assignedSubjects =
+                        result.getInt("AssignedSubjects");
+
+                incompleteResults =
+                        result.getInt("IncompleteResults");
+
+                passedSubjects =
+                        result.getInt("PassedSubjects");
+
+                optionalSubjects =
+                        result.getInt("OptionalSubjects");
+            }
+
+            String qualificationStatus;
+
+            if (assignedSubjects == 0 || incompleteResults > 0) {
+
+                qualificationStatus = "Results Processing";
+
+            } else if (optionalSubjects < minimumOptionalSubjects
+                    || passedSubjects < requiredPassedSubjects) {
+
+                qualificationStatus = "Not Qualified";
+
+            } else {
+
+                qualificationStatus = "Qualified";
+            }
+
+            String updateSQL = """
+                    UPDATE StudentAcademicYear
+                    SET CertificateStatus = ?
+                    WHERE StudentAcademicYearID = ?
+                    """;
+
+            try (PreparedStatement updateStatement =
+                         connection.prepareStatement(updateSQL)) {
+
+                updateStatement.setString(1, qualificationStatus);
+                updateStatement.setInt(2, studentAcademicYearID);
+
+                updateStatement.executeUpdate();
+            }
+
+            return qualificationStatus;
+        }
+    }
+
 }
