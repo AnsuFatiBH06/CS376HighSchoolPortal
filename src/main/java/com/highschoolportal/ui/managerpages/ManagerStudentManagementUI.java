@@ -29,8 +29,7 @@ public class ManagerStudentManagementUI extends JPanel {
 
     private final JComboBox<String> subjectCodeBox = new JComboBox<>();
     private final JComboBox<String> certificateStatusBox = new JComboBox<>(
-            new String[]{"All", "Qualified", "Not Qualified", "Results Processing"});
-
+            new String[] { "All", "Qualified", "Unqualified", "Results Processing" });
     private final JCheckBox incompleteCurriculumBox = new JCheckBox("Incomplete curriculum only");
 
     private final DefaultTableModel model = new DefaultTableModel(

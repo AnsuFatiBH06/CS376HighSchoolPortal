@@ -383,7 +383,7 @@ public class StudentManagementService {
         String sql = """
                 INSERT INTO StudentAcademicYear
                 (StudentID, AcademicYearID, Grade, CertificateStatus)
-                VALUES (?, ?, NULL, 'Not Qualified')
+                VALUES (?, ?, NULL, 'Results Processing')
                 """;
 
         try (PreparedStatement statement = connection.prepareStatement(
@@ -961,7 +961,7 @@ public class StudentManagementService {
             } else if (optionalSubjects < minimumOptionalSubjects
                     || passedSubjects < requiredPassedSubjects) {
 
-                qualificationStatus = "Not Qualified";
+                qualificationStatus = "Unqualified";
 
             } else {
 
