@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.highschoolportal.database.MySQLConnect;
 import com.highschoolportal.model.IncompleteCurriculumStudent;
@@ -745,6 +747,46 @@ public class StudentManagementService {
     return subjectCodes;
 }
 
+    // Returns all academic years in which the student is enrolled.
+    // The map contains AcademicYearID -> AcademicYearName.
+    public Map<Integer, String> getStudentAcademicYears(int studentID)
+            throws SQLException {
+
+        if (studentID <= 0) {
+            throw new IllegalArgumentException(
+                    "A valid logged-in Student is required."
+            );
+        }
+
+        String sql = """
+                SELECT ay.AcademicYearID, ay.Name
+                FROM StudentAcademicYear say
+                JOIN AcademicYear ay
+                    ON ay.AcademicYearID = say.AcademicYearID
+                WHERE say.StudentID = ?
+                ORDER BY ay.StartDate DESC
+                """;
+
+        Map<Integer, String> academicYears = new LinkedHashMap<>();
+
+        try (Connection connection = MySQLConnect.getInstance().getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, studentID);
+
+            try (ResultSet result = statement.executeQuery()) {
+                while (result.next()) {
+                    academicYears.put(
+                            result.getInt("AcademicYearID"),
+                            result.getString("Name")
+                    );
+                }
+            }
+        }
+
+        return academicYears;
+    }
+    
     // Returns the qualification status for a student.
     // The student can only access their own academic-year enrolment.
     public String getQualificationStatusForStudent(
