@@ -487,12 +487,12 @@ public class StudentCurriculumUI extends JPanel {
     private void refreshSelectionTab() {
 
         Student student = (Student) app.getCurrentUser();
-            if (student == null) {
-                JOptionPane.showMessageDialog(this, "You need to be signed in as a student first.");
-                return;
-            }
+        if (student == null) {
+        // JOptionPane.showMessageDialog(this, "You need to be signed in as a student first.");
+        return;
+        }
 
-            int studentID = student.getUserID();
+        int studentID = student.getUserID();
 
         availableModel.setRowCount(0);
 
@@ -521,12 +521,12 @@ public class StudentCurriculumUI extends JPanel {
     private void refreshCurriculumTab() {
 
         Student student = (Student) app.getCurrentUser();
-            if (student == null) {
-                JOptionPane.showMessageDialog(this, "You need to be signed in as a student first.");
-                return;
-            }
+        if (student == null) {
+        // JOptionPane.showMessageDialog(this, "You need to be signed in as a student first.");
+        return;
+        }
 
-            int studentID = student.getUserID();
+        int studentID = student.getUserID();
 
         coreModel.setRowCount(0);
 

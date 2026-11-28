@@ -100,7 +100,7 @@ public class ManagerHomePageUI extends JPanel {
         // add(academicYearButton);
         // add(logoutButton);
         schoolRegButton.addActionListener(event
-                -> this.app.showPage(PageNames.MANAGER_SCHOOL_SIGNUP)
+                -> this.app.showPage(PageNames.MANAGER_SCHOOL_MANAGEMENT)
         );
 
         academicYearButton.addActionListener(event
